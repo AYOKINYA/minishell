@@ -163,67 +163,33 @@ int echo_dollar(char *token, char **env)
 
 int sh_echo(char **tokens, char **env)
 {
-	pid_t	pid;
-	pid_t	wait_pid;
 	int		token_count;
 	int		i;
-	int		status;
-	int		fd[2];
 
-	if (pipe(fd) == -1)
-	{
-		ft_putstr_fd("pipe error\n", 1);
-		exit(0);
-	}
 	token_count = 0;
 	while (tokens[token_count] != 0)
 		++token_count;
 	i = 1;
-	pid = fork();
-	if (pid == 0)
+	if (token_count == 1)
 	{
-		printf("it is child process.\n");
-		printf("====================\n");
-		if (token_count == 1)
-		{
-			write(1, "\n", 1);
-			exit (0);
-		}
-		if (ft_strcmp(tokens[1], "-n") == 0)
-			i = 2;
-		while (tokens[i] != 0)
-		{
-			if (tokens[i][0] == '$')
-				echo_dollar(tokens[i], env);
-			else
-				ft_putstr_fd(tokens[i], 1);
-			if (i != token_count - 1)
-					write(1, " ", 1);	
-			++i;
-		}
-		if (ft_strcmp(tokens[1], "-n") != 0)
-			write(1, "\n", 1);
-		sleep(1);
-		exit(0);
+		write(1, "\n", 1);
+		exit (0);
 	}
-	else if (pid > 0)
+	if (ft_strcmp(tokens[1], "-n") == 0)
+		i = 2;
+	while (tokens[i] != 0)
 	{
-		wait_pid = waitpid(pid, &status, 0);
-		if (wait_pid == -1)
-			ft_putstr_fd("wait_pid returns error. no child process", 1);
+		if (tokens[i][0] == '$')
+			echo_dollar(tokens[i], env);
 		else
-		{
-			printf("====================\n");
-			ft_putstr_fd("child process is done.\n", 1);
-		}
-		printf("parent process ends\n");
-		return (0);
+			ft_putstr_fd(tokens[i], 1);
+		if (i != token_count - 1)
+				write(1, " ", 1);	
+		++i;
 	}
-	else
-	{
-		ft_putstr_fd("Fork is failed.", 1);
-		return (-1);
-	}
+	if (ft_strcmp(tokens[1], "-n") != 0)
+		write(1, "\n", 1);
+	
 	return (0);
 }
 
@@ -257,10 +223,117 @@ int sh_env(char **tokens, char **env)
 	return (0);
 }
 
+int sh_pwd(void)
+{
+	char buf[1024];
+
+	if (!getcwd(buf, 1024))
+		return (-1);
+	ft_putendl_fd(buf, 1);
+
+	return (0);
+}
+
+int sh_cd(char **tokens, char **env)
+{
+	int token_count;
+	int cd_result;
+	int i;
+
+	token_count = 0;
+	while (tokens[token_count] != 0)
+		++token_count;
+	if (token_count == 1 || (token_count == 2 && ft_strlen(tokens[1]) == 1 && tokens[1][0] == '~'))
+	{
+		i = 0;
+		while (env[i] != 0)
+		{
+			if (ft_strncmp(env[i], "HOME=", 5) == 0)
+			{
+				ft_putendl_fd(env[i] + 5, 1);
+				chdir((env[i] + 5));
+				sh_pwd();
+			}
+			++i;
+		}
+	}
+	else if (token_count > 2)
+		ft_putendl_fd("cd: too many arguments", 1);
+	else
+	{
+		cd_result = chdir(tokens[1]);
+		if (cd_result == 0)
+			sh_pwd();
+		if (cd_result != 0)
+		{
+			ft_putstr_fd("cd: no such file or directory: ", 1);
+			ft_putendl_fd(tokens[1], 1);
+		}
+	}
+
+	return (0);
+}
+
 int cmd_not_exists(char **tokens)
 {
 	ft_putstr_fd("zsh: command not found: ", 1);
 	ft_putendl_fd(tokens[0], 1);
+	return (0);
+}
+
+int exec_cmds(char **tokens, char **env)
+{
+	int		status;
+	pid_t	pid;
+	pid_t	wait_pid;
+	
+	if (ft_strcmp(tokens[0], "exit") == 0)
+		sh_exit();
+	else if (ft_strcmp(tokens[0], "cd") == 0)
+		sh_cd(tokens, env);
+	else
+	{
+		pid = fork();
+		if (pid == 0)
+		{
+			printf("it is child process.\n");
+			printf("====================\n");
+			
+			//malloc guard
+			if (ft_strcmp(tokens[0], "echo") == 0)
+				sh_echo(tokens, env);
+			else if (ft_strcmp(tokens[0], "pwd") == 0)
+				sh_pwd();
+			// else if (ft_strcmp(tokens[0], "export") == 0)
+			// 	sh_export(tokens);
+			// else if (ft_strcmp(tokens[0], "unset") == 0)
+			// 	sh_unset(tokens);
+			else if (ft_strcmp(tokens[0], "env") == 0)
+				sh_env(tokens, env);
+			else
+				cmd_not_exists(tokens); //나중에 execve로 검색하는 부분 추가
+			sleep(1);
+			exit(0);
+		}
+		else if (pid > 0)
+		{
+			wait_pid = waitpid(pid, &status, 0);
+			if (wait_pid == -1)
+				ft_putstr_fd("wait_pid returns error. no child process", 1);
+			else
+			{
+				printf("====================\n");
+				ft_putstr_fd("child process is done.\n", 1);
+			}
+			printf("parent process ends\n");
+			return (0);
+		}
+		else
+		{
+			ft_putstr_fd("Fork is failed.", 1);
+			return (-1);
+		}
+	}
 	return (0);
 }
 
@@ -269,7 +342,7 @@ int main(int argc, char **argv, char **env)
 	char	*line;
 	char	**cmd;
 	char	**tokens;
-	int		i;
+	int		i; 
 	int		j;
 	int		status;
 
@@ -278,10 +351,11 @@ int main(int argc, char **argv, char **env)
 	line = 0;
 
 	hello_sh();
+	status = 1;
 
 	while (status)
 	{
-		if ((status = get_next_line(0, &line)) == -1 )
+		if ((status = get_next_line(0, &line)) == -1)
 			return (-1);
 		line = ft_strtrim(line, " "); //malloc guard
 		cmd = ft_split(line, ";\n"); //malloc guard
@@ -291,25 +365,7 @@ int main(int argc, char **argv, char **env)
 			cmd[i] = ft_strtrim(cmd[i], " "); //malloc guard
 			tokens = ft_split(cmd[i], " \\"); //malloc guard
 			if (tokens[0] != 0)
-			{
-				//malloc guard
-				if (ft_strcmp(tokens[0], "echo") == 0)
-					sh_echo(tokens, env);
-				// else if (ft_strcmp(tokens[0], "cd") == 0)
-				// 	sh_cd(tokens);
-				// else if (ft_strcmp(tokens[0], "pwd") == 0)
-				// 	sh_pwd(tokens);
-				// else if (ft_strcmp(tokens[0], "export") == 0)
-				// 	sh_export(tokens);
-				// else if (ft_strcmp(tokens[0], "unset") == 0)
-				// 	sh_unset(tokens);
-				else if (ft_strcmp(tokens[0], "env") == 0)
-					sh_env(tokens, env);
-				else if (ft_strcmp(tokens[0], "exit") == 0)
-					sh_exit();
-				else
-					cmd_not_exists(tokens); //나중에 execve로 검색하는 부분 추가
-			}
+				exec_cmds(tokens, env);
 			j = 0;
 			while (tokens[j] != 0)
 			{
