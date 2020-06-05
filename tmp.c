@@ -8,6 +8,7 @@
 
 #define BUFFER_SIZE 100
 
+
 int				ft_free_and_ret(char **s_res, int ret)
 {
 	if (*s_res)
@@ -104,37 +105,16 @@ void hello_sh(void)
 	ft_putstr_fd("> ", 1);
 }
 
-// void sh_loop(void)
-// {
-// 	int status;
-// 	int ret;
-
-// 	status = 1;
-
-// 	while (status)
-// 	{
-// 		ft_putchar(" >");
-// 	}
-	
-// 	if (ft_strcmp("exit", cmd, 4) == 0)
-//     {
-// 		ft_putchar("Bye!");
-// 		exit (0);
-// 	}
-// }
-
 int echo_dollar_question(void)
 {
 	return (0);
 }
 
-int echo_dollar(char *token, char **env)
+int echo_dollar(char *token, t_list *env)
 {
-	int		i;
 	int		j;
 	char	*cmp;
 
-	i = 0;
 	j = 1;
 	if (ft_strlen(token) == 1)
 		write(1, token, 1);
@@ -150,18 +130,18 @@ int echo_dollar(char *token, char **env)
 		}
 		cmp[j] = '=';
 		cmp[j + 1] = '\0';
-		while (env[i] != 0)
+		while (env != 0)
 		{
-			if (ft_strncmp(env[i], cmp, ft_strlen(cmp)) == 0)
-				ft_putstr_fd((env[i] + ft_strlen(cmp) + 1), 1);
-			++i;
+			if (ft_strncmp(env->content, cmp, ft_strlen(cmp)) == 0)
+				ft_putstr_fd((env->content + ft_strlen(cmp) + 1), 1);
+			env = env->next;
 		}
 		free(cmp);
 	}
 	return (1);
 }
 
-int sh_echo(char **tokens, char **env)
+int sh_echo(char **tokens, t_list *env)
 {
 	int		token_count;
 	int		i;
@@ -198,9 +178,8 @@ int sh_exit(void)
 	exit (0);
 }
 
-int sh_env(char **tokens, char **env)
+int sh_env(char **tokens, t_list *env)
 {
-	int i;
 	int token_count;
 
 	token_count = 0;
@@ -213,12 +192,11 @@ int sh_env(char **tokens, char **env)
 		ft_putendl_fd(": No such file or directory", 1);
 		return (0);
 	}
-	i = 0;
-	while (env[i] != 0)
+	while (env != 0)
 	{
-		ft_putstr_fd(env[i], 1);
+		ft_putstr_fd(env->content, 1);
 		write(1, "\n", 1);
-		++i;
+		env = env->next;
 	}
 	return (0);
 }
@@ -234,27 +212,25 @@ int sh_pwd(void)
 	return (0);
 }
 
-int sh_cd(char **tokens, char **env)
+int sh_cd(char **tokens, t_list *env)
 {
 	int token_count;
 	int cd_result;
-	int i;
 
 	token_count = 0;
 	while (tokens[token_count] != 0)
 		++token_count;
 	if (token_count == 1 || (token_count == 2 && ft_strlen(tokens[1]) == 1 && tokens[1][0] == '~'))
 	{
-		i = 0;
-		while (env[i] != 0)
+		while (env != 0)
 		{
-			if (ft_strncmp(env[i], "HOME=", 5) == 0)
+			if (ft_strncmp(env->content, "HOME=", 5) == 0)
 			{
-				ft_putendl_fd(env[i] + 5, 1);
-				chdir((env[i] + 5));
+				ft_putendl_fd(env->content + 5, 1);
+				chdir((env->content + 5));
 				sh_pwd();
 			}
-			++i;
+			env = env->next;
 		}
 	}
 	else if (token_count > 2)
@@ -274,6 +250,158 @@ int sh_cd(char **tokens, char **env)
 	return (0);
 }
 
+int change_var_value(t_list *tmp, char *token)
+{
+	free(tmp->content);
+	if (!(tmp->content = ft_strdup(token)))
+		return (-1);
+	return (0);
+}
+
+int is_var_already(char *token, t_list *env)
+{
+	t_list	*tmp;
+	int len;
+
+	tmp = env;
+	while (tmp != 0)
+	{
+		len = 0;
+		while (token[len] != '=')
+			++len;
+		if (ft_strncmp(tmp->content, token, len) == 0)
+		{
+			change_var_value(tmp, token);
+			return (1);
+		}
+		tmp = tmp->next;
+	}
+	return (0);
+}
+
+int sh_export(char **tokens, t_list *env)
+{
+	int		i;
+	int		token_count;
+	t_list	*new;
+
+
+	token_count = 0;
+	while (tokens[token_count] != 0)
+		++token_count;
+	if (token_count == 1)
+		sh_env(tokens, env);
+	else
+	{
+		i = 1;
+		while (i < token_count)
+		{
+			if (ft_strchr(tokens[i], '=') != 0)
+			{
+				if (ft_strlen(tokens[i]) == 1)
+					ft_putendl_fd("zsh : bad assignment", 1);
+				else
+				{
+					if (!is_var_already(tokens[i], env))
+					{
+						if (!(new = (t_list *)malloc(sizeof(t_list))))
+							return (-1);
+						if (!(new->content = ft_strdup(tokens[i])))
+							return (-1);
+						new->next = 0;
+						ft_lstadd_back(&env, new);
+					}
+				}
+			}
+			++i;
+		}
+	}
+	return (0);
+}
+
+int is_alpha_num(char *s)
+{
+	while (*s != '\0')
+	{
+		if (!ft_isalnum(*s))
+			return (0);
+		++s;
+	}
+	return (1);
+}
+
+int is_var(char *token, t_list *env)
+{
+	int		i;
+	t_list	*tmp;
+	char	*var;
+
+	tmp = env;
+	while (tmp != 0)
+	{
+		i = 0;
+		var = (char *)(tmp->content);
+		while (var[i] != '=')
+		{
+			if (var[i] != token[i])
+				break;
+			++i;
+		}
+		tmp = tmp->next;
+		if (var[i] == '=')
+			return (1);
+	}
+	return (0);
+}
+
+int unset_var(char *token, t_list *env)
+{
+	t_list *tmp;
+
+	while (env != 0)
+	{
+		if (ft_strncmp((env->next)->content, token, ft_strlen(token)) == 0)
+		{
+			tmp = (env->next)->next;
+			free((env->next)->content);
+			free(env->next);
+			env->next = tmp;
+			return (1);
+		}
+		env = env->next;
+	}
+	return (0);
+}
+
+int sh_unset(char **tokens, t_list *env)
+{
+	int i;
+	int token_count;
+	
+	token_count = 0;
+	while (tokens[token_count] != 0)
+		++token_count;
+	if (token_count == 1)
+		ft_putendl_fd("unset: not enough arguments", 1);
+	else
+	{
+		i = 1;
+		while (i < token_count)
+		{
+			if (!is_alpha_num(tokens[i]))
+			{
+				ft_putstr_fd("unset: ", 1);
+				ft_putstr_fd(tokens[i], 1);
+				ft_putendl_fd(": invalid parameter name", 1);
+			}
+			else if (is_var(tokens[i], env))
+				unset_var(tokens[i], env);
+			++i;
+		}
+	}
+	return (0);
+}
+
 int cmd_not_exists(char **tokens)
 {
 	ft_putstr_fd("zsh: command not found: ", 1);
@@ -281,7 +409,7 @@ int cmd_not_exists(char **tokens)
 	return (0);
 }
 
-int exec_cmds(char **tokens, char **env)
+int exec_cmds(char **tokens, t_list *env)
 {
 	int		status;
 	pid_t	pid;
@@ -291,6 +419,10 @@ int exec_cmds(char **tokens, char **env)
 		sh_exit();
 	else if (ft_strcmp(tokens[0], "cd") == 0)
 		sh_cd(tokens, env);
+	else if (ft_strcmp(tokens[0], "export") == 0)
+		sh_export(tokens, env);
+	else if (ft_strcmp(tokens[0], "unset") == 0)
+		sh_unset(tokens, env);
 	else
 	{
 		pid = fork();
@@ -304,10 +436,6 @@ int exec_cmds(char **tokens, char **env)
 				sh_echo(tokens, env);
 			else if (ft_strcmp(tokens[0], "pwd") == 0)
 				sh_pwd();
-			// else if (ft_strcmp(tokens[0], "export") == 0)
-			// 	sh_export(tokens);
-			// else if (ft_strcmp(tokens[0], "unset") == 0)
-			// 	sh_unset(tokens);
 			else if (ft_strcmp(tokens[0], "env") == 0)
 				sh_env(tokens, env);
 			else
@@ -337,7 +465,29 @@ int exec_cmds(char **tokens, char **env)
 	return (0);
 }
 
-int main(int argc, char **argv, char **env)
+t_list *copy_env(char **envp)
+{
+	int		i;
+	t_list	*res;
+	t_list	*new;
+
+	if (!(res = ft_lstnew(envp[0])))
+		return (0);
+	i = 1;
+	while(envp[i] != 0)
+	{
+		if (!(new = (t_list *)malloc(sizeof(t_list))))
+			return (0);
+		new->content = ft_strdup(envp[i]);
+		new->next = 0;
+		ft_lstadd_back(&res, new);
+		++i;
+	}
+
+	return (res);
+}
+
+int main(int argc, char **argv, char **envp)
 {
 	char	*line;
 	char	**cmd;
@@ -345,14 +495,18 @@ int main(int argc, char **argv, char **env)
 	int		i; 
 	int		j;
 	int		status;
+	t_list	*env;
 
-	if (!argc || !argv || !env)
+	if (!argc || !argv || !envp)
 		return (0);
 	line = 0;
 
 	hello_sh();
-	status = 1;
+	
+	if (!(env = copy_env(envp)))
+		return (-1);
 
+	status = 1;
 	while (status)
 	{
 		if ((status = get_next_line(0, &line)) == -1)
@@ -363,7 +517,7 @@ int main(int argc, char **argv, char **env)
 		while (cmd[i] != 0)
 		{
 			cmd[i] = ft_strtrim(cmd[i], " "); //malloc guard
-			tokens = ft_split(cmd[i], " \\"); //malloc guard
+			tokens = ft_split(cmd[i], " \t"); //malloc guard
 			if (tokens[0] != 0)
 				exec_cmds(tokens, env);
 			j = 0;
@@ -381,6 +535,7 @@ int main(int argc, char **argv, char **env)
 		line = 0;
 		ft_putstr_fd("> ", 1);
 	}
+	ft_lstclear(&env, free);
 
 	return (0);
 }
