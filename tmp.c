@@ -493,8 +493,9 @@ int redirection_split(char *res, t_list *tokens)
 	res += len;
 	if (*res == '\0')
 	{
-		ft_putendl_fd("zsh: parse error near '\\n'", 1);
-		return (0);
+		// if (len == 1 || len == 2)
+		// 	ft_putendl_fd("zsh: parse error near '\\n'", 1);
+		return (1);
 	}
 	if (redirection_right_split(res, tokens) == -1)
 		return (0);
@@ -623,8 +624,6 @@ int		converted_len(char *s, t_list *env)
 			len += var_len(&s, env);
 		else
 		{
-			if (*s == '$' * -1)
-				*s *= -1;
 			printf("*s is %c\n", *s);
 			++len;
 			++s;
@@ -659,7 +658,7 @@ int		add_var(char **s, t_list *env, char **res)
 		return (1);
 	copy = *s;
 	i = 0;
-	while (**s != '\0' && **s != '$' * -1 && **s != '$')
+	while (**s != '\0' && **s != '$' * -1)
 	{
 		printf("*s ADD VAR is %c\n", **s);
 		++i;
@@ -684,17 +683,16 @@ char	*convert_var_to_value(char *content, t_list *env)
 	s = content;
 	len = converted_len(s, env);
 	printf("len is : %d\n", len);
-	ret = (char *)malloc(sizeof(char) * (len + 1));
+	if (!(ret = (char *)malloc(sizeof(char) * (len + 1))))
+		return (0);
 	ret[len] = 0;
 	res = ret;
-	printf("START %s\n", s);
 	while (*s != '\0')
 	{
 		if (*s == '$' * -1 && *(s + 1) != '\0' && *(s + 1) != '$' * -1)
 			add_var(&s, env, &res);
 		else
 		{
-			printf("*s in is %c\n", *s);
 			if (*s == '$' * -1)
 				*s *= -1;
 			*res = *s;
@@ -748,6 +746,66 @@ char	**tokens_into_args(t_list *tokens, t_list *env)
 	return (args);
 }
 
+int has_redirection(char *arg)
+{
+	while (*arg != '\0')
+	{
+		if (is_redirection(*arg))
+			return (1);
+		++arg;
+	}
+	return (0);
+}
+
+int only_one_sign(char *arg)
+{
+	char c;
+
+	c = *arg;
+	while (*arg != '\0')
+	{
+		if (c != *arg)
+			return (0);
+		++arg;
+	}
+	return (1);
+}
+
+int investigate_redirection(char **args, int i)
+{
+	if (args[i + 1] == 0 || ft_strlen(args[i]) > 2) //redirection 다음 arg 없을 때!
+	{
+		ft_putendl_fd("syntax error!", 2);	
+		return (0);
+	}
+	else if (ft_strlen(args[i]) == 2)
+	{
+		if (args[i][0] != '>' && args[i][1] != '>')
+		{
+			ft_putendl_fd("syntax error!", 2);	
+			return (0);
+		}
+	}
+	return (1);
+}
+
+int validate_redirection(char **args)
+{
+	int i;
+
+	i = 0;
+	while (args[i] != 0)
+	{
+		if (has_redirection(args[i]))
+		{
+			if (!investigate_redirection(args, i))
+				return (0);
+		}
+		++i;
+	}
+	return (1);
+}
+
 int tokenize(char *line, t_list *env)
 {
 	t_list	*tokens;
@@ -766,10 +824,18 @@ int tokenize(char *line, t_list *env)
 		ft_lstclear(&tokens, free);
 		return (0);
 	}
-	if (!(args = tokens_into_args(tokens, env))) // args 성공적이면 함수 안에서 바로 ft_lstclear한다.
+	if (!(args = tokens_into_args(tokens, env))) // args 성공적이면 함수 안에서 바로 linked list인 tokens를 ft_lstclear한다.
 	{
 		ft_lstclear(&tokens, free);
 		return (0);
+	}
+	if (!(validate_redirection(args)))
+	{
+		int i = 0;
+		while (args[i] != 0)
+			++i;
+		ft_free(args, i);
+		return (1);
 	}
 	return (1);
 }
@@ -806,7 +872,7 @@ t_list *copy_env(char **envp)
 	if (!(res = ft_lstnew(envp[0])))
 		return (0);
 	i = 1;
-	while(envp[i] != 0)
+	while (envp[i] != 0)
 	{
 		if (!(new = (t_list *)malloc(sizeof(t_list))))
 			return (0);
@@ -815,7 +881,6 @@ t_list *copy_env(char **envp)
 		ft_lstadd_back(&res, new);
 		++i;
 	}
-
 	return (res);
 }
 
