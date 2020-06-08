@@ -98,6 +98,341 @@ int				get_next_line(int fd, char **line)
 	return (ft_free_and_ret(&s_res, ret));
 }
 
+void hello_sh(void)
+{
+	ft_putstr_fd("Hi, it's jkang's minishell.\n", 1);
+	ft_putstr_fd("> ", 1);
+}
+
+int echo_dollar_question(void)
+{
+	return (0);
+}
+
+int sh_echo(char **tokens)
+{
+	int		token_count;
+	int		i;
+
+	token_count = 0;
+	while (tokens[token_count] != 0)
+		++token_count;
+	i = 1;
+	if (token_count == 1)
+	{
+		write(1, "\n", 1);
+		exit (0);
+	}
+	if (ft_strcmp(tokens[1], "-n") == 0)
+		i = 2;
+	while (tokens[i] != 0)
+	{
+		ft_putstr_fd(tokens[i], 1);
+		if (i != token_count - 1)
+			write(1, " ", 1);	
+		++i;
+	}
+	if (ft_strcmp(tokens[1], "-n") != 0)
+		write(1, "\n", 1);
+	
+	return (0);
+}
+
+int sh_exit(void)
+{
+	exit (0);
+}
+
+int sh_env(char **tokens, t_list *env)
+{
+	int token_count;
+
+	token_count = 0;
+	while (tokens[token_count] != 0)
+		++token_count;
+	if (token_count > 1)
+	{
+		ft_putstr_fd("env: ", 1);
+		ft_putstr_fd(tokens[1], 1);
+		ft_putendl_fd(": No such file or directory", 1);
+		return (0);
+	}
+	while (env != 0)
+	{
+		ft_putstr_fd(env->content, 1);
+		write(1, "\n", 1);
+		env = env->next;
+	}
+	return (0);
+}
+
+int sh_pwd(void)
+{
+	char buf[1024];
+
+	if (!getcwd(buf, 1024))
+		return (-1);
+	ft_putendl_fd(buf, 1);
+
+	return (0);
+}
+
+int sh_cd(char **tokens, t_list *env)
+{
+	int token_count;
+	int cd_result;
+
+	token_count = 0;
+	while (tokens[token_count] != 0)
+		++token_count;
+	if (token_count == 1 || (token_count == 2 && ft_strlen(tokens[1]) == 1 && tokens[1][0] == '~'))
+	{
+		while (env != 0)
+		{
+			if (ft_strncmp(env->content, "HOME=", 5) == 0)
+			{
+				ft_putendl_fd(env->content + 5, 1);
+				chdir((env->content + 5));
+				sh_pwd();
+			}
+			env = env->next;
+		}
+	}
+	else if (token_count > 2)
+		ft_putendl_fd("cd: too many arguments", 1);
+	else
+	{
+		cd_result = chdir(tokens[1]);
+		if (cd_result == 0)
+			sh_pwd();
+		if (cd_result != 0)
+		{
+			ft_putstr_fd("cd: no such file or directory: ", 1);
+			ft_putendl_fd(tokens[1], 1);
+		}
+	}
+
+	return (0);
+}
+
+int change_var_value(t_list *tmp, char *token)
+{
+	free(tmp->content);
+	if (!(tmp->content = ft_strdup(token)))
+		return (0);
+	return (1);
+}
+
+int is_var_already(char *token, t_list *env)
+{
+	t_list	*tmp;
+	int len;
+
+	tmp = env;
+	while (tmp != 0)
+	{
+		len = 0;
+		while (token[len] != '=')
+			++len;
+		if (ft_strncmp(tmp->content, token, len) == 0)
+		{
+			change_var_value(tmp, token);
+			return (1);
+		}
+		tmp = tmp->next;
+	}
+	return (0);
+}
+
+int sh_export(char **tokens, t_list *env)
+{
+	int		i;
+	int		token_count;
+	t_list	*new;
+
+
+	token_count = 0;
+	while (tokens[token_count] != 0)
+		++token_count;
+	if (token_count == 1)
+		sh_env(tokens, env);
+	else
+	{
+		i = 1;
+		while (i < token_count)
+		{
+			if (ft_strchr(tokens[i], '=') != 0)
+			{
+				if (ft_strlen(tokens[i]) == 1)
+					ft_putendl_fd("zsh : bad assignment", 1);
+				else
+				{
+					if (!is_var_already(tokens[i], env))
+					{
+						if (!(new = (t_list *)malloc(sizeof(t_list))))
+							return (-1);
+						if (!(new->content = ft_strdup(tokens[i])))
+							return (-1);
+						new->next = 0;
+						ft_lstadd_back(&env, new);
+					}
+				}
+			}
+			++i;
+		}
+	}
+	return (0);
+}
+
+int is_alpha_num(char *s)
+{
+	while (*s != '\0')
+	{
+		if (!ft_isalnum(*s))
+			return (0);
+		++s;
+	}
+	return (1);
+}
+
+int is_var(char *token, t_list *env)
+{
+	int		i;
+	t_list	*tmp;
+	char	*var;
+
+	tmp = env;
+	while (tmp != 0)
+	{
+		i = 0;
+		var = (char *)(tmp->content);
+		while (var[i] != '=')
+		{
+			if (var[i] != token[i])
+				break;
+			++i;
+		}
+		tmp = tmp->next;
+		if (var[i] == '=')
+			return (1);
+	}
+	return (0);
+}
+
+int unset_var(char *token, t_list *env)
+{
+	t_list *tmp;
+
+	while (env != 0)
+	{
+		if (ft_strncmp((env->next)->content, token, ft_strlen(token)) == 0)
+		{
+			tmp = (env->next)->next;
+			free((env->next)->content);
+			free(env->next);
+			env->next = tmp;
+			return (1);
+		}
+		env = env->next;
+	}
+	return (0);
+}
+
+int sh_unset(char **tokens, t_list *env)
+{
+	int i;
+	int token_count;
+	
+	token_count = 0;
+	while (tokens[token_count] != 0)
+		++token_count;
+	if (token_count == 1)
+		ft_putendl_fd("unset: not enough arguments", 1);
+	else
+	{
+		i = 1;
+		while (i < token_count)
+		{
+			if (!is_alpha_num(tokens[i]))
+			{
+				ft_putstr_fd("unset: ", 1);
+				ft_putstr_fd(tokens[i], 1);
+				ft_putendl_fd(": invalid parameter name", 1);
+			}
+			else if (is_var(tokens[i], env))
+				unset_var(tokens[i], env);
+			++i;
+		}
+	}
+	return (0);
+}
+
+int cmd_not_exists(char **tokens)
+{
+	ft_putstr_fd("zsh: command not found: ", 1);
+	ft_putendl_fd(tokens[0], 1);
+	return (0);
+}
+
+int exec_args(char **tokens, t_list *env)
+{
+	int		status;
+	pid_t	pid;
+	pid_t	wait_pid;
+	
+	if (tokens[0] == 0)
+		return (1);
+	if (ft_strcmp(tokens[0], "exit") == 0)
+		sh_exit();
+	else if (ft_strcmp(tokens[0], "cd") == 0)
+		sh_cd(tokens, env);
+	else if (ft_strcmp(tokens[0], "export") == 0)
+		sh_export(tokens, env);
+	else if (ft_strcmp(tokens[0], "unset") == 0)
+		sh_unset(tokens, env);
+	else
+	{
+		pid = fork();
+		if (pid == 0)
+		{
+			printf("it is child process.\n");
+			printf("====================\n");
+			
+			//malloc guard
+			if (ft_strcmp(tokens[0], "echo") == 0)
+				sh_echo(tokens);
+			else if (ft_strcmp(tokens[0], "pwd") == 0)
+				sh_pwd();
+			else if (ft_strcmp(tokens[0], "env") == 0)
+				sh_env(tokens, env);
+			else
+				cmd_not_exists(tokens); //나중에 execve로 검색하는 부분 추가
+			sleep(1);
+			exit(0);
+		}
+		else if (pid > 0)
+		{
+			wait_pid = waitpid(pid, &status, 0);
+			if (wait_pid == -1)
+				ft_putstr_fd("wait_pid returns error. no child process", 1);
+			else
+			{
+				printf("====================\n");
+				ft_putstr_fd("child process is done.\n", 1);
+			}
+			printf("parent process ends\n");
+			return (0);
+		}
+		else
+		{
+			ft_putstr_fd("Fork is failed.", 1);
+			return (-1);
+		}
+	}
+	return (0);
+}
+
+
 void quote_mark(int *quote, char c)
 {
 	if (*quote == 0 && (c == '\'' || c == '\"'))
@@ -136,10 +471,8 @@ char	*exception_substr(char *from, int len, char *except_str)
 	i = 0;
 	if (!(res = (char *)malloc(sizeof(char) * (len + 1))))
 		return (0);
-	printf("from is : %s\n", from);
 	while (i < len)
 	{
-		printf("*from with exception : %c\n", *from);
 		if (is_exception(*from, except_str))
 			++from;
 		res[i] = *from;
@@ -158,7 +491,6 @@ int unquoted_token_len(int *quote, char **line, int *escape_exception)
 	while (**line != '\0' && **line != ' ')
 	{
 		quote_mark(quote, **line);
-		printf("*quote during unquoted: %d\n", *quote);
 		if (*quote != 0)
 			break ;
 		if (is_special(**line))
@@ -186,32 +518,22 @@ char	*read_unquoted_token(int *quote, char **line)
 	from = *line;
 	escape_exception = 0;
 	len = unquoted_token_len(quote, line, &escape_exception);
-	printf("len : %d\n", len);
 	if (escape_exception == 0)
 		res = ft_substr(from, 0, len);
 	else
 		res = exception_substr(from, len, "\\");
-	printf("res : %s\n", res);
 	return (res);
 }
 
 void escape_letter(int *quote, char **line, int *escape_exception)
 {
-	printf("escape!\n");
-	printf("escape starting line %s\n", *line);
-	printf("escape quote %d\n", *quote);
-	printf("escape next char %c\n", (*line)[1]);
-	printf("t or f : %d\n", (*quote == '\"'));
-	printf("t or f : %d\n", ((*line)[1] == '\\'));
 	if (*quote == '\'' && (*line)[1] == '\\')
 	{
-		printf("escape 1 \n");
 		++(*line); //backslash로 이동
 		*escape_exception = 1;
 	}
 	else if (*quote == '\"' && ((*line)[1] == '$' || (*line)[1] == '\\' || (*line)[1] == '\"'))
 	{
-		printf("escape 2\n");
 		++(*line); //backslash로 이동
 		*escape_exception = 2;
 	}
@@ -225,8 +547,6 @@ int quoted_token_len(int *quote, char **line, int *escape_exception)
 	while (**line != '\0' && *quote != 0)
 	{
 		quote_mark(quote, **line);
-		printf("**line during len : %d\n", **line);
-		printf("*quote during len : %d\n", *quote);
 		if (*quote == 0)
 			break ;
 		if (*quote == '\"' && **line == '$')
@@ -249,21 +569,15 @@ char *read_quoted_token(int *quote, char **line)
 
 	if (**line == '\"' || **line == '\'')
 		++(*line); // quote 바로 다음 letter로 넘어간다!
-	printf("**line : %c\n", **line);
-	printf("*quote : %d\n", *quote);
-	
 	from = *line;
 	escape_exception = 0;
 	len = quoted_token_len(quote, line, &escape_exception);
-	printf("len %d\n", len);
-	printf("flag %d\n", escape_exception);
 	if (escape_exception == 0)
 		res = ft_substr(from, 0, len);
 	else if (escape_exception == 1)
 		res = exception_substr(from, len, "\\");
 	else
 		res = exception_substr(from, len, "$\\\"");
-	printf("res : %s\n", res);
 	return (res);
 }
 
@@ -492,11 +806,7 @@ int redirection_split(char *res, t_list *tokens)
 		return (0);
 	res += len;
 	if (*res == '\0')
-	{
-		// if (len == 1 || len == 2)
-		// 	ft_putendl_fd("zsh: parse error near '\\n'", 1);
 		return (1);
-	}
 	if (redirection_right_split(res, tokens) == -1)
 		return (0);
 	free(start);
@@ -558,7 +868,7 @@ int cmds_into_tokens(char *line, t_list *tokens)
 	return (1);
 }
 
-int		is_var(char *content)
+int		is_env_var(char *content)
 {
 	while (*content != '\0')
 	{
@@ -579,7 +889,6 @@ int		get_value_len(char *env_content)
 	++env_content; // = 다음 문자로 넘어가기
 	while (*env_content != '\0')
 	{	
-		printf("**s : %c\n", *env_content);
 		++value_len;
 		++env_content;
 	}
@@ -609,7 +918,6 @@ int		var_len(char **s, t_list *env)
 			value_len = get_value_len(env->content);
 		env = env->next;
 	}
-	printf("value_len : %d\n", value_len);
 	return (value_len);
 }
 
@@ -624,12 +932,10 @@ int		converted_len(char *s, t_list *env)
 			len += var_len(&s, env);
 		else
 		{
-			printf("*s is %c\n", *s);
 			++len;
 			++s;
 		}
 	}
-	printf("final converted len : %d\n", len);
 	return (len);
 }
 
@@ -641,7 +947,6 @@ void		get_value(char *env_content, char **res)
 	while (*env_content != '\0')
 	{	
 		**res = *env_content;
-		printf("**res : %c\n", **res);
 		++(*res);
 		++env_content;
 	}
@@ -652,7 +957,6 @@ int		add_var(char **s, t_list *env, char **res)
 	int		i;
 	char	*copy;
 
-	printf("*s ADD VAR is %c\n", **s);
 	++(*s); // $ 다음 문자로 넘어간다.
 	if (**s == '\0')
 		return (1);
@@ -660,7 +964,6 @@ int		add_var(char **s, t_list *env, char **res)
 	i = 0;
 	while (**s != '\0' && **s != '$' * -1)
 	{
-		printf("*s ADD VAR is %c\n", **s);
 		++i;
 		++(*s);
 	}
@@ -682,7 +985,6 @@ char	*convert_var_to_value(char *content, t_list *env)
 	
 	s = content;
 	len = converted_len(s, env);
-	printf("len is : %d\n", len);
 	if (!(ret = (char *)malloc(sizeof(char) * (len + 1))))
 		return (0);
 	ret[len] = 0;
@@ -696,7 +998,6 @@ char	*convert_var_to_value(char *content, t_list *env)
 			if (*s == '$' * -1)
 				*s *= -1;
 			*res = *s;
-			printf("*res is %c\n", *res);
 			++res;
 			++s;
 		}
@@ -716,7 +1017,7 @@ char	**tokens_into_args(t_list *tokens, t_list *env)
 	tokens = tokens->next;
 	while (tokens != 0)
 	{
-		if (is_var(tokens->content))
+		if (is_env_var(tokens->content))
 		{
 			if (!(args[i] = convert_var_to_value(tokens->content, env)))
 			{
@@ -757,32 +1058,18 @@ int has_redirection(char *arg)
 	return (0);
 }
 
-int only_one_sign(char *arg)
-{
-	char c;
-
-	c = *arg;
-	while (*arg != '\0')
-	{
-		if (c != *arg)
-			return (0);
-		++arg;
-	}
-	return (1);
-}
-
 int investigate_redirection(char **args, int i)
 {
 	if (args[i + 1] == 0 || ft_strlen(args[i]) > 2) //redirection 다음 arg 없을 때!
 	{
-		ft_putendl_fd("syntax error!", 2);	
+		ft_putendl_fd("syntax error1!", 2);	
 		return (0);
 	}
 	else if (ft_strlen(args[i]) == 2)
 	{
-		if (args[i][0] != '>' && args[i][1] != '>')
+		if (args[i][0] != '>' * -1 || args[i][1] != '>' * -1)
 		{
-			ft_putendl_fd("syntax error!", 2);	
+			ft_putendl_fd("syntax error2!", 2);	
 			return (0);
 		}
 	}
@@ -837,6 +1124,7 @@ int tokenize(char *line, t_list *env)
 		ft_free(args, i);
 		return (1);
 	}
+	exec_args(args, env);
 	return (1);
 }
 
@@ -887,24 +1175,27 @@ t_list *copy_env(char **envp)
 int main(int argc, char **argv, char **envp)
 {
 	char	*line;
-	// int status;
+	int status;
 	t_list	*env;
 
 	if (!argc || !argv || !envp)
 		return (0);
-
 	if (!(env = copy_env(envp)))
 		return (-1);
 	line = 0;
-	while (1)
+	ft_putstr_fd("> ", 1);
+	status = 1;
+	while (status != 0)
 	{
-		get_next_line(0, &line);
-		if (!exec_cmds(line, env))
+		status = get_next_line(0, &line);
+		printf("status : %d\n", status);
+		if (exec_cmds(line, env) <= 0)
 		{
 			free(line);
 			break;
 		}
 		free(line);
+		ft_putstr_fd("> ", 1);
 	}
 	free(env);
 	return (0);
