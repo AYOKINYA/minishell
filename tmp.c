@@ -374,6 +374,35 @@ int cmd_not_exists(char **tokens)
 	return (0);
 }
 
+int check_fd_aggregation(char **args)
+{
+	int count;
+	int i;
+	int j;
+
+	count = 0;
+	i = 0;
+	while (args[i] != 0)
+	{
+		j = 0;
+		while (args[i][j] != '\0')
+		{
+			if (args[i][j] == '<' * -1 || args[i][j] == '>' * -1)
+				++count;
+			if (args[i][j] == '>' * -1 && args[i][j + 1] == '>' * -1)
+				count -= 1;	
+			++j;
+		}
+		++i;
+	}
+	if (count > 1)
+	{
+		ft_putendl_fd("fd aggregation is not supported.", 2);
+		return (0);
+	}
+	return (1);
+}
+
 int exec_args(char **tokens, t_list *env)
 {
 	int		status;
@@ -382,6 +411,8 @@ int exec_args(char **tokens, t_list *env)
 	
 	if (tokens[0] == 0)
 		return (1);
+	if (!check_fd_aggregation(tokens))
+		return (0);
 	if (ft_strcmp(tokens[0], "exit") == 0)
 		sh_exit();
 	else if (ft_strcmp(tokens[0], "cd") == 0)
@@ -1093,7 +1124,67 @@ int validate_redirection(char **args)
 	return (1);
 }
 
-int tokenize(char *line, t_list *env)
+int		count_cmds(char **args)
+{
+	int count;
+
+	count = 1;
+	while (*args != 0)
+	{
+		if (**args == '|' * -1)
+			++count;
+		++args;
+	}
+	return (count);
+}
+
+int		count_args(char **args)
+{
+	int count;
+
+	count = 0;
+	while (*args != 0)
+	{
+		if (**args == '|' * -1 || **args == '\0')
+			break ;
+		++count;
+		++args;
+	}
+	return (count);
+}
+
+char	***pipe_split(char **args)
+{
+	int		cmds_count;
+	int		args_count;	
+	int		i;
+	int		j;
+	char	***res;
+
+	cmds_count = count_cmds(args);
+	res = (char ***)malloc(sizeof(char **) * (cmds_count + 1));
+	res[cmds_count] = 0;
+	i = 0;
+	while (i < cmds_count)
+	{
+		args_count = count_args(args);
+		res[i] = (char **)malloc(sizeof(char *) *(args_count + 1));
+		res[args_count] = 0;
+		j = 0;
+		while (j < args_count)
+		{
+			res[i][j] = ft_strdup(*args);
+			++args;
+			++j;
+		}
+		++i;
+		++args;
+	}
+
+	return (res);
+}
+
+char	**tokenize(char *line, t_list *env)
 {
 	t_list	*tokens;
 	char	**args;
@@ -1116,15 +1207,32 @@ int tokenize(char *line, t_list *env)
 		ft_lstclear(&tokens, free);
 		return (0);
 	}
+	return (args);
+}
+
+int process_cmd(char *line, t_list *env)
+{
+	char	**args;
+	char	***cmds;
+	int		i;
+
+	if (!(args = tokenize(line, env)))
+		return (0);
 	if (!(validate_redirection(args)))
 	{
-		int i = 0;
+		i = 0;
 		while (args[i] != 0)
 			++i;
 		ft_free(args, i);
 		return (1);
 	}
-	exec_args(args, env);
+	printf("pipe_split\n");
+	cmds = pipe_split(args);
+	while (*cmds)
+	{
+		exec_args(*cmds, env);
+		++cmds;
+	}
 	return (1);
 }
 
@@ -1140,7 +1248,7 @@ int exec_cmds(char *line, t_list *env)
 	i = 0;
 	while (cmds[i] != 0)
 	{
-		if (!tokenize(cmds[i], env))
+		if (!process_cmd(cmds[i], env))
 		{
 			ft_free(cmds, i);
 			return (0);
@@ -1189,7 +1297,7 @@ int main(int argc, char **argv, char **envp)
 	{
 		status = get_next_line(0, &line);
 		printf("status : %d\n", status);
-		if (exec_cmds(line, env) <= 0)
+		if (!exec_cmds(line, env))
 		{
 			free(line);
 			break;
