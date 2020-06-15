@@ -105,12 +105,7 @@ void hello_sh(void)
 	ft_putstr_fd("> ", 1);
 }
 
-int echo_dollar_question(void)
-{
-	return (0);
-}
-
-int sh_echo(char **tokens)
+int sh_echo(char **tokens, int *p_status)
 {
 	int		token_count;
 	int		i;
@@ -122,6 +117,7 @@ int sh_echo(char **tokens)
 	if (token_count == 1)
 	{
 		write(1, "\n", 1);
+		*p_status = 0;
 		return (1);
 	}
 	if (ft_strcmp(tokens[1], "-n") == 0)
@@ -135,6 +131,7 @@ int sh_echo(char **tokens)
 	}
 	if (ft_strcmp(tokens[1], "-n") != 0)
 		write(1, "\n", 1);
+	*p_status = 0;
 	return (1);
 }
 
@@ -149,23 +146,27 @@ int is_numeric(char *s)
 	return (1);
 }
 
-int sh_exit(char **tokens)
+int sh_exit(char **tokens, int *p_status)
 {
 	int count;
 
 	count = 0;
 	while (tokens[count] != 0)
 		++count;
+	ft_putendl_fd("exit", 1);
 	if (count == 2 && is_numeric(tokens[1]))
 		exit(ft_atoi(tokens[1]));
 	else if (count > 2 && is_numeric(tokens[1]))
-		ft_putendl_fd("exit: too many arguments\n", 2);
+	{
+		ft_putendl_fd("bash: exit: too many arguments", 2);
+		*p_status = 1;
+	}
 	else
 		exit(2);
 	return (1);
 }
 
-int sh_env(char **tokens, t_list *env)
+int sh_env(char **tokens, t_list *env, int *p_status)
 {
 	int token_count;
 
@@ -174,11 +175,14 @@ int sh_env(char **tokens, t_list *env)
 		++token_count;
 	if (token_count > 1)
 	{
-		ft_putstr_fd("env: ", 1);
+		ft_putstr_fd("env: '", 1);
 		ft_putstr_fd(tokens[1], 1);
+		ft_putstr_fd("'", 1);
 		ft_putendl_fd(": No such file or directory", 2);
+		*p_status = 1;
 		return (0);
 	}
+	env = env->next;
 	while (env != 0)
 	{
 		ft_putstr_fd(env->content, 1);
@@ -199,7 +203,7 @@ int sh_pwd(void)
 	return (0);
 }
 
-int sh_cd(char **tokens, t_list *env)
+int sh_cd(char **tokens, t_list *env, int *p_status)
 {
 	int token_count;
 	int cd_result;
@@ -221,7 +225,10 @@ int sh_cd(char **tokens, t_list *env)
 		}
 	}
 	else if (token_count > 2)
-		ft_putendl_fd("cd: too many arguments", 1);
+	{
+		ft_putendl_fd("cd: too many arguments", 2);
+		*p_status = 1;
+	}
 	else
 	{
 		cd_result = chdir(tokens[1]);
@@ -229,12 +236,13 @@ int sh_cd(char **tokens, t_list *env)
 			sh_pwd();
 		if (cd_result != 0)
 		{
-			ft_putstr_fd("cd: no such file or directory: ", 1);
+			ft_putstr_fd("cd: no such file or directory: ", 2);
 			ft_putendl_fd(tokens[1], 1);
+			*p_status = 1;
+			printf("cd error p_status : %d\n", *p_status);
 		}
 	}
-
-	return (0);
+	return (1);
 }
 
 int change_var_value(t_list *tmp, char *token)
@@ -266,7 +274,7 @@ int is_var_already(char *token, t_list *env)
 	return (0);
 }
 
-int sh_export(char **tokens, t_list *env)
+int sh_export(char **tokens, t_list *env, int *p_status)
 {
 	int		i;
 	int		token_count;
@@ -277,7 +285,7 @@ int sh_export(char **tokens, t_list *env)
 	while (tokens[token_count] != 0)
 		++token_count;
 	if (token_count == 1)
-		sh_env(tokens, env);
+		sh_env(tokens, env, p_status);
 	else
 	{
 		i = 1;
@@ -286,7 +294,10 @@ int sh_export(char **tokens, t_list *env)
 			if (ft_strchr(tokens[i], '=') != 0)
 			{
 				if (ft_strlen(tokens[i]) == 1)
+				{
 					ft_putendl_fd("zsh : bad assignment", 1);
+					*p_status = 1;
+				}
 				else
 				{
 					if (!is_var_already(tokens[i], env))
@@ -1145,7 +1156,7 @@ char	*convert_var_to_value(char *content, t_list *env)
 	res = ret;
 	while (*s != '\0')
 	{
-		if (*s == '$' * -1 && *(s + 1) != '\0' && *(s + 1) != '$' * -1 && *(s + 1) != '?')
+		if (*s == '$' * -1 && *(s + 1) != '\0' && *(s + 1) != '$' * -1)// && *(s + 1) != '?')
 			add_var(&s, env, &res);
 		else
 		{
@@ -1349,22 +1360,22 @@ char	**tokenize(char *line, t_list *env)
 	return (args);
 }
 
-int exec_builtin_cmds(char **tokens, t_list *env)
+int exec_builtin_cmds(char **tokens, t_list *env, int *p_status)
 {
 	if (ft_strcmp(tokens[0], "exit") == 0)
-		sh_exit(tokens);
+		sh_exit(tokens, p_status);
 	else if (ft_strcmp(tokens[0], "cd") == 0)
-		sh_cd(tokens, env);
+		sh_cd(tokens, env, p_status);
 	else if (ft_strcmp(tokens[0], "export") == 0)
-		sh_export(tokens, env);
+		sh_export(tokens, env, p_status);
 	else if (ft_strcmp(tokens[0], "unset") == 0)
 		sh_unset(tokens, env);
 	else if (ft_strcmp(tokens[0], "echo") == 0)
-		sh_echo(tokens);
+		sh_echo(tokens, p_status);
 	else if (ft_strcmp(tokens[0], "pwd") == 0)
 		sh_pwd();
 	else if (ft_strcmp(tokens[0], "env") == 0)
-		sh_env(tokens, env);
+		sh_env(tokens, env, p_status);
 	else
 		return (0);
 	return (1);
@@ -1478,23 +1489,16 @@ int	parent_process(pid_t pid, int *pipe_fd, int *p_status)
 	close(pipe_fd[0]);
 	wait_pid = waitpid(pid, &status, 0);
 	if (wait_pid == -1)
-		ft_putstr_fd("wait_pid returns error. no child process", 1);
-	else
-	{
-		printf("====================\n");
-		ft_putstr_fd("child process is done.\n", 1);
-		printf("wait_pid status : %d\n", status);
-	}
-	printf("parent process ends\n");
-	*p_status = status;
+		ft_putstr_fd("wait_pid returns error. no child process", 2);
+	*p_status = status / 256;
 	return (1);
 }
 
-int main_cmd_with_fork(char **cmd, t_list *env, char **envp)
+int main_cmd_with_fork(char **cmd, t_list *env, char **envp, int *p_status)
 {
 	int ret;
 
-	if ((ret = exec_builtin_cmds(cmd, env)) == -1)
+	if ((ret = exec_builtin_cmds(cmd, env, p_status)) == -1)
 	{
 		free_2d_array(cmd);
 		return(0);
@@ -1517,18 +1521,16 @@ int process_cmds_with_fork(char ***cmds, t_list *env, char **envp, int *p_status
 	pipe(pipe_fd);
 	if ((pid = fork()) == -1)
 	{
-		ft_putstr_fd("Fork is failed.", 1);
+		ft_putstr_fd("Fork is failed.", 2);
 		return (0);
 	}
 	else if (pid == 0)
 	{
-		printf("it is child process.\n");
-		printf("====================\n");
 		if (!process_pipe_and_redirection(cmds, pipe_fd, &redirection))
 			exit(1);
 		if (!(cmd = get_cmd(*cmds, redirection))) // redirection과 child process pipe 처리 거친 명령어 ex) echo hi, ls, ...
 			exit(1);
-		if (!main_cmd_with_fork(cmd, env, envp)) //2d array cmd free처리 안에서 다 한다.
+		if (!main_cmd_with_fork(cmd, env, envp, p_status)) //2d array cmd free처리 안에서 다 한다.
 			exit(1);
 		exit(0);
 	}
@@ -1544,13 +1546,13 @@ int process_cmd_without_fork(char ***cmds, t_list *env, char **envp, int *p_stat
 {
 	pid_t pid;
 	int status;
+
 	if ((*cmds)[0] == 0)
 		return (1);
 	if (!check_fd_aggregation(*cmds))
 		return (0);
-	if (!exec_builtin_cmds(*cmds, env))
+	if (!exec_builtin_cmds(*cmds, env, p_status))
 	{
-		
 		if ((pid = fork()) == -1)
 		{
 			ft_putendl_fd("FORK FAILED", 2);
@@ -1564,8 +1566,9 @@ int process_cmd_without_fork(char ***cmds, t_list *env, char **envp, int *p_stat
 		}
 		else
 		{		
-			waitpid(pid, &status, 0);
-			*p_status = status;
+			if (waitpid(pid, &status, 0) == -1)
+				ft_putendl_fd("waitpid returns error. no child process", 2);
+			*p_status = status / 256;
 		}
 	}
 	return (1);
@@ -1573,12 +1576,12 @@ int process_cmd_without_fork(char ***cmds, t_list *env, char **envp, int *p_stat
 
 int process_cmd(char ***cmds, t_list *env, char **envp, int *p_status)
 {
-	int i;
+	int len;
 	int redirection_flag;
 
-	i = 0;
-	while (cmds[i] != 0)
-		++i;
+	len = 0;
+	while (cmds[len] != 0)
+		++len;
 	redirection_flag = 0;
 	int j = 0;
 	while (cmds[0][j] != 0)
@@ -1590,21 +1593,45 @@ int process_cmd(char ***cmds, t_list *env, char **envp, int *p_status)
 		}
 		++j;
 	}
-	if (i == 1 && !redirection_flag)
+	if (len == 1 && !redirection_flag)
 	{
 		process_cmd_without_fork(cmds, env, envp, p_status);
 		return (1);
 	}
 	while (*cmds)
 	{
-		if ((*cmds)[0] == 0)
+		if ((*(cmds))[0] == 0)
 			return (1);
-		if (!check_fd_aggregation(*cmds))
+		if (!check_fd_aggregation(*(cmds)))
 			return (0);
 		if (!process_cmds_with_fork(cmds, env, envp, p_status))
 				return (0);
 		++cmds;
 	}
+	// while (*(cmds + len - 1) && len)
+	// {
+	// 	if ((*(cmds + len - 1))[0] == 0)
+	// 		return (1);
+	// 	if (!check_fd_aggregation(*(cmds + len - 1)))
+	// 		return (0);
+	// 	if (!process_cmds_with_fork(cmds + len - 1, env, envp, p_status))
+	// 			return (0);
+	// 	len--;
+	// }
+	return (1);
+}
+
+int dollar_question(t_list *env, int *p_status)
+{
+	char *new;
+
+	if (!(new = ft_strdup("?=")))
+		return (0);
+	if (!(new = ft_strjoin(new , ft_itoa(*p_status))))
+		return (0);
+	free(env->content);
+	if (!(env->content = new))
+		return (0);
 	return (1);
 }
 
@@ -1622,6 +1649,8 @@ int exec_input(char *line, t_list *env, char **envp, int *p_status)
 	i = -1;
 	while (inputs[++i] != 0)
 	{
+		if (!dollar_question(env, p_status))
+			return (0);
 		if (!(cmds = get_cmds_with_pipe_split(inputs[i], env)))
 		{
 			free_2d_array(inputs);
@@ -1648,15 +1677,22 @@ t_list *copy_env(char **envp)
 	int		i;
 	t_list	*res;
 	t_list	*new;
+	char *zero;
 
-	if (!(res = ft_lstnew(envp[0])))
+	if (!(zero = ft_strdup("?=0")))
 		return (0);
-	i = 1;
+	if (!(res = ft_lstnew(zero)))
+		return (0);
+	i = 0;
 	while (envp[i] != 0)
 	{
 		if (!(new = (t_list *)malloc(sizeof(t_list))))
 			return (0);
-		new->content = ft_strdup(envp[i]);
+		if (!(new->content = ft_strdup(envp[i])))
+		{
+			free(new);
+			ft_lstclear(&res, free);
+		}
 		new->next = 0;
 		ft_lstadd_back(&res, new);
 		++i;
@@ -1708,6 +1744,6 @@ int main(int argc, char **argv, char **envp)
 		if (read_status > 0)
 			ft_putstr_fd("> ", 1);
 	}
-	free(env);
+	ft_lstclear(&env, free);
 	return (0);
 }
