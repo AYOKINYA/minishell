@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <sys/wait.h>
 #include <stdio.h>
+#include <signal.h>
 
 #define BUFFER_SIZE 100
 
@@ -34,8 +35,8 @@ int				ft_has_new_line(char *buf, char **s_res, char **line)
 		tmp[i] = '\0';
 		if (!(*line = ft_strjoin(*line, tmp)))
 			return (ft_free_and_ret(s_res, -1));
-		//free(*s_res);
-		//*s_res = 0;
+		free(*s_res);
+		*s_res = 0;
 		if (!(*s_res = ft_strdup(&buf[i + 1])))
 			return (ft_free_and_ret(s_res, -1));
 		return (1);
@@ -121,7 +122,7 @@ int sh_echo(char **tokens)
 	if (token_count == 1)
 	{
 		write(1, "\n", 1);
-		exit (0);
+		return (1);
 	}
 	if (ft_strcmp(tokens[1], "-n") == 0)
 		i = 2;
@@ -134,13 +135,34 @@ int sh_echo(char **tokens)
 	}
 	if (ft_strcmp(tokens[1], "-n") != 0)
 		write(1, "\n", 1);
-	
-	return (0);
+	return (1);
 }
 
-int sh_exit(void)
+int is_numeric(char *s)
 {
-	exit (0);
+	while (*s != 0)
+	{
+		if (*s < '0' || *s > '9')
+			return (0);
+		++s;
+	}
+	return (1);
+}
+
+int sh_exit(char **tokens)
+{
+	int count;
+
+	count = 0;
+	while (tokens[count] != 0)
+		++count;
+	if (count == 2 && is_numeric(tokens[1]))
+		exit(ft_atoi(tokens[1]));
+	else if (count > 2 && is_numeric(tokens[1]))
+		ft_putendl_fd("exit: too many arguments\n", 2);
+	else
+		exit(2);
+	return (1);
 }
 
 int sh_env(char **tokens, t_list *env)
@@ -154,7 +176,7 @@ int sh_env(char **tokens, t_list *env)
 	{
 		ft_putstr_fd("env: ", 1);
 		ft_putstr_fd(tokens[1], 1);
-		ft_putendl_fd(": No such file or directory", 1);
+		ft_putendl_fd(": No such file or directory", 2);
 		return (0);
 	}
 	while (env != 0)
@@ -367,11 +389,125 @@ int sh_unset(char **tokens, t_list *env)
 	return (0);
 }
 
-int cmd_not_exists(char **tokens)
+int count_path_len(char *env_path)
 {
-	ft_putstr_fd("zsh: command not found: ", 1);
-	ft_putendl_fd(tokens[0], 1);
-	return (0);
+	int count;
+
+	count = 0;
+	while (env_path[count] != '\0' && env_path[count] != ':')
+		++count;
+	return (count);
+
+}
+
+char *get_env_path(char **envp)
+{
+	char *env_path;
+	
+	while (*envp != 0)
+	{
+		if (ft_strncmp(*envp, "PATH=", 5) == 0)
+		{
+			*envp += 5;
+			if (!(env_path = ft_strdup(*envp)))
+				return (0);
+			break ;
+		}
+		++envp;
+	}
+	return (env_path);
+}
+
+char	*get_path(char *env_path, int path_len)
+{
+	char	*tmp;
+	char	*path;
+	
+	if (*env_path == '/')
+	{
+		if (!(path = ft_substr(env_path, 0, path_len)))
+			return (0);
+	}
+	else
+	{
+		if (!(tmp = ft_strdup("/")))
+			return (0);
+		if (!(path = ft_substr(env_path, 0, path_len)))
+			return (0);
+		if (!(path = ft_strjoin(tmp, path)))
+			return (0);
+	}
+
+	return (path);
+}
+
+int exec_with_path(char **tokens, char **envp, char *env_path, int path_len)
+{
+	char	*path;
+	int		ret;
+	
+	if (!(path = get_path(env_path, path_len)))
+		return (0);
+	if (!(path = ft_strjoin(path, "/")))
+		return (0);
+	if (!(path = ft_strjoin(path, tokens[0])))
+		return (0);
+	ret = execve(path, tokens, envp);
+	free(path);
+	if (ret >= 0)
+		return (2);
+	return (1);
+}
+
+int search_with_path(char **tokens, char **envp)
+{
+	char	*env_path;
+	char	*origin;
+	int		path_len;
+	int		ret;
+
+	if (!(env_path = get_env_path(envp)))
+		return (0);
+	origin = env_path;
+	while (*env_path != 0)
+	{
+		path_len = count_path_len(env_path);
+		if (!(ret = exec_with_path(tokens, envp, env_path, path_len)))
+		{
+			free(origin);
+			return (0);
+		}
+		env_path += path_len + 1;
+		if (*env_path != '\0')
+			++env_path;
+	}
+	free(origin);
+	return (ret);
+}
+
+int cmd_not_builtins(char **tokens, char **envp)
+{
+	int ret;
+
+	if (ft_strncmp(tokens[0], "/", 1) == 0 || ft_strncmp(tokens[0], "/", 1) == 0)
+	{
+		if ((ret = execve(tokens[0], tokens, envp)) == -1)
+		{
+			ft_putstr_fd("zsh: command not found: ", 1);
+			ft_putendl_fd(tokens[0], 1);
+		}
+	}
+	else
+	{
+		if (!(ret = search_with_path(tokens, envp)))
+			return (0);
+		else if (ret == 1)
+		{
+			ft_putstr_fd("zsh: command not found: ", 1);
+			ft_putendl_fd(tokens[0], 1);
+		}
+	}
+	return (1);
 }
 
 int check_fd_aggregation(char **args)
@@ -401,66 +537,6 @@ int check_fd_aggregation(char **args)
 		return (0);
 	}
 	return (1);
-}
-
-int exec_args(char **tokens, t_list *env)
-{
-	int		status;
-	pid_t	pid;
-	pid_t	wait_pid;
-	
-	if (tokens[0] == 0)
-		return (1);
-	if (!check_fd_aggregation(tokens))
-		return (0);
-	if (ft_strcmp(tokens[0], "exit") == 0)
-		sh_exit();
-	else if (ft_strcmp(tokens[0], "cd") == 0)
-		sh_cd(tokens, env);
-	else if (ft_strcmp(tokens[0], "export") == 0)
-		sh_export(tokens, env);
-	else if (ft_strcmp(tokens[0], "unset") == 0)
-		sh_unset(tokens, env);
-	else
-	{
-		pid = fork();
-		if (pid == 0)
-		{
-			printf("it is child process.\n");
-			printf("====================\n");
-			
-			//malloc guard
-			if (ft_strcmp(tokens[0], "echo") == 0)
-				sh_echo(tokens);
-			else if (ft_strcmp(tokens[0], "pwd") == 0)
-				sh_pwd();
-			else if (ft_strcmp(tokens[0], "env") == 0)
-				sh_env(tokens, env);
-			else
-				cmd_not_exists(tokens); //나중에 execve로 검색하는 부분 추가
-			sleep(1);
-			exit(0);
-		}
-		else if (pid > 0)
-		{
-			wait_pid = waitpid(pid, &status, 0);
-			if (wait_pid == -1)
-				ft_putstr_fd("wait_pid returns error. no child process", 1);
-			else
-			{
-				printf("====================\n");
-				ft_putstr_fd("child process is done.\n", 1);
-			}
-			printf("parent process ends\n");
-			return (0);
-		}
-		else
-		{
-			ft_putstr_fd("Fork is failed.", 1);
-			return (-1);
-		}
-	}
-	return (0);
 }
 
 
@@ -550,9 +626,15 @@ char	*read_unquoted_token(int *quote, char **line)
 	escape_exception = 0;
 	len = unquoted_token_len(quote, line, &escape_exception);
 	if (escape_exception == 0)
-		res = ft_substr(from, 0, len);
+	{
+		if (!(res = ft_substr(from, 0, len)))
+			return (0);
+	}
 	else
-		res = exception_substr(from, len, "\\");
+	{
+		if (!(res = exception_substr(from, len, "\\")))
+			return (0);
+	}
 	return (res);
 }
 
@@ -590,8 +672,29 @@ int quoted_token_len(int *quote, char **line, int *escape_exception)
 	}
 	return (len);
 }
+char	*ret_str(int escape_exception, char *from, int len)
+{
+	char	*res;
 
-char *read_quoted_token(int *quote, char **line)
+	if (escape_exception == 0)
+	{
+		if (!(res = ft_substr(from, 0, len)))
+			return (0);
+	}
+	else if (escape_exception == 1)
+	{	
+		if (!(res = exception_substr(from, len, "\\")))
+			return (0);
+	}
+	else
+	{
+		if (!(res = exception_substr(from, len, "$\\\"")))
+			return (0);
+	}
+	return (res);
+}
+
+char	*read_quoted_token(int *quote, char **line)
 {
 	char	*from;
 	char	*res;
@@ -603,12 +706,8 @@ char *read_quoted_token(int *quote, char **line)
 	from = *line;
 	escape_exception = 0;
 	len = quoted_token_len(quote, line, &escape_exception);
-	if (escape_exception == 0)
-		res = ft_substr(from, 0, len);
-	else if (escape_exception == 1)
-		res = exception_substr(from, len, "\\");
-	else
-		res = exception_substr(from, len, "$\\\"");
+	if (!(res = ret_str(escape_exception, from ,len)))
+		return (0);
 	return (res);
 }
 
@@ -660,6 +759,30 @@ void		ft_free(char **map, int index)
 	free(map);
 }
 
+void	free_2d_array(char **arr)
+{
+	int count;
+
+	count = 0;
+	while (arr[count] != 0)
+		++count;
+	ft_free(arr, count);
+}
+
+void	free_3d_array(char ***arr)
+{
+	int count;
+
+	count = 0;
+	while (arr[count] != 0)
+		++count;
+	while (count--)
+	{
+		free_2d_array(arr[count]);
+	}
+	free(arr);
+}
+
 int		only_semicolon(char *line)
 {
 	int semicolon_count;
@@ -679,7 +802,7 @@ int		only_semicolon(char *line)
 	}
 	if (semicolon_count == 1 && start[i] == '\0')
 		return (1);
-	else if (semicolon_count > 1)
+	else if (semicolon_count > 1 && start[i] == '\0')
 	{
 		ft_putendl_fd("zsh: parse error near ';;'", 1);
 		return (1);
@@ -1022,7 +1145,7 @@ char	*convert_var_to_value(char *content, t_list *env)
 	res = ret;
 	while (*s != '\0')
 	{
-		if (*s == '$' * -1 && *(s + 1) != '\0' && *(s + 1) != '$' * -1)
+		if (*s == '$' * -1 && *(s + 1) != '\0' && *(s + 1) != '$' * -1 && *(s + 1) != '?')
 			add_var(&s, env, &res);
 		else
 		{
@@ -1162,25 +1285,41 @@ char	***pipe_split(char **args)
 	char	***res;
 
 	cmds_count = count_cmds(args);
-	res = (char ***)malloc(sizeof(char **) * (cmds_count + 1));
+	if (!(res = (char ***)malloc(sizeof(char **) * (cmds_count + 1))))
+		return (0);
 	res[cmds_count] = 0;
 	i = 0;
 	while (i < cmds_count)
 	{
 		args_count = count_args(args);
-		res[i] = (char **)malloc(sizeof(char *) *(args_count + 1));
-		res[args_count] = 0;
+		if (!(res[i] = (char **)malloc(sizeof(char *) *(args_count + 1))))
+		{
+			// while (i--)
+			// 	free(res[i]);
+			// free(res);
+			free_3d_array(res);
+			return (0);
+		}
+		res[i][args_count] = 0;
 		j = 0;
 		while (j < args_count)
 		{
-			res[i][j] = ft_strdup(*args);
+			if (!(res[i][j] = ft_strdup(*args)))
+			{
+				// while (j--)
+				// 	free(res[i][j]);
+				// while (i--)
+				// 	free(res[i]);
+				// free(res);
+				free_3d_array(res);
+				return (0);
+			}
 			++args;
 			++j;
 		}
-		++i;
 		++args;
+		++i;
 	}
-
 	return (res);
 }
 
@@ -1210,52 +1349,297 @@ char	**tokenize(char *line, t_list *env)
 	return (args);
 }
 
-int process_cmd(char *line, t_list *env)
+int exec_builtin_cmds(char **tokens, t_list *env)
+{
+	if (ft_strcmp(tokens[0], "exit") == 0)
+		sh_exit(tokens);
+	else if (ft_strcmp(tokens[0], "cd") == 0)
+		sh_cd(tokens, env);
+	else if (ft_strcmp(tokens[0], "export") == 0)
+		sh_export(tokens, env);
+	else if (ft_strcmp(tokens[0], "unset") == 0)
+		sh_unset(tokens, env);
+	else if (ft_strcmp(tokens[0], "echo") == 0)
+		sh_echo(tokens);
+	else if (ft_strcmp(tokens[0], "pwd") == 0)
+		sh_pwd();
+	else if (ft_strcmp(tokens[0], "env") == 0)
+		sh_env(tokens, env);
+	else
+		return (0);
+	return (1);
+}
+
+int check_redirection(char **cmd, int *file_fd)
+{
+	int redirection;
+
+	redirection = 0;
+	while (*cmd != 0)
+	{
+		if (**cmd == '>' * -1 && *(*cmd + 1) != '>' * -1)
+			redirection = 1;
+		else if (**cmd == '>' * -1 &&  *(*cmd + 1) == '>' * -1)
+			redirection = 2;
+		else if (**cmd == '<' * -1)
+			redirection = 3;
+		if (redirection > 0)
+			break ;
+		++cmd;
+	}
+	if (redirection == 1)
+		*file_fd = open(*(cmd + 1), O_RDWR | O_CREAT | O_TRUNC | S_IROTH, 0644);
+	else if (redirection == 2)
+		*file_fd = open(*(cmd + 1), O_RDWR | O_APPEND | S_IROTH, 0644);
+	else if (redirection == 3)
+		*file_fd = open(*(cmd + 1) , O_RDONLY);
+	else
+		*file_fd = 1;
+	return (redirection);
+}
+
+char **get_cmd(char **cmd, int redirection)
+{
+	int count;
+	int i;
+	char **res;
+
+	count = 0;
+	while (cmd[count] != 0)
+		++count;
+	if (redirection)
+		count -= 2;
+	if (!(res = (char **)malloc(sizeof(char *) * (count + 1))))
+		return (0);
+	res[count] = 0;
+	i = -1;
+	while (++i < count)
+	{
+		if (is_redirection(**cmd))
+			cmd += 2;
+		if (!(res[i] = ft_strdup(*cmd)))
+		{
+			ft_free(res, i);
+			return (0);
+		}
+		++cmd;
+	}
+	return (res);
+}
+
+char ***get_cmds_with_pipe_split(char *line, t_list *env)
 {
 	char	**args;
 	char	***cmds;
-	int		i;
-
+	
 	if (!(args = tokenize(line, env)))
 		return (0);
 	if (!(validate_redirection(args)))
 	{
-		i = 0;
-		while (args[i] != 0)
-			++i;
-		ft_free(args, i);
+		free_2d_array(args);
+		return (0);
+	}
+	if (!(cmds = pipe_split(args)))
+	{
+		free_2d_array(args);
+		return (0);
+	}
+	return (cmds);
+}
+
+int		process_pipe_and_redirection(char ***cmds, int *pipe_fd, int *redirection)
+{
+	int file_fd;
+	
+	close(pipe_fd[0]);
+	if (*(cmds + 1) != 0)
+		dup2(pipe_fd[1], 1);
+	close(pipe_fd[1]);
+	*redirection = check_redirection(*cmds, &file_fd);
+	if (file_fd < 0)
+	{
+		ft_putendl_fd("file fd error!", 2);
+		return (0);
+	}
+	else if (*redirection == 1 || *redirection == 2)
+		dup2(file_fd, 1);
+	else if (*redirection == 3)
+		dup2(file_fd, 0);
+	return (1);
+}
+
+int	parent_process(pid_t pid, int *pipe_fd, int *p_status)
+{
+	int		status;
+	pid_t	wait_pid;
+
+	close(pipe_fd[1]);
+	dup2(pipe_fd[0], 0);
+	close(pipe_fd[0]);
+	wait_pid = waitpid(pid, &status, 0);
+	if (wait_pid == -1)
+		ft_putstr_fd("wait_pid returns error. no child process", 1);
+	else
+	{
+		printf("====================\n");
+		ft_putstr_fd("child process is done.\n", 1);
+		printf("wait_pid status : %d\n", status);
+	}
+	printf("parent process ends\n");
+	*p_status = status;
+	return (1);
+}
+
+int main_cmd_with_fork(char **cmd, t_list *env, char **envp)
+{
+	int ret;
+
+	if ((ret = exec_builtin_cmds(cmd, env)) == -1)
+	{
+		free_2d_array(cmd);
+		return(0);
+	}
+	else if (ret == 0)
+	{
+		cmd_not_builtins(cmd, envp);
+	}
+	free_2d_array(cmd);
+	return (1);
+}
+
+int process_cmds_with_fork(char ***cmds, t_list *env, char **envp, int *p_status)
+{
+	pid_t	pid;
+	int		redirection;
+	int		pipe_fd[2];
+	char	**cmd;
+	
+	pipe(pipe_fd);
+	if ((pid = fork()) == -1)
+	{
+		ft_putstr_fd("Fork is failed.", 1);
+		return (0);
+	}
+	else if (pid == 0)
+	{
+		printf("it is child process.\n");
+		printf("====================\n");
+		if (!process_pipe_and_redirection(cmds, pipe_fd, &redirection))
+			exit(1);
+		if (!(cmd = get_cmd(*cmds, redirection))) // redirection과 child process pipe 처리 거친 명령어 ex) echo hi, ls, ...
+			exit(1);
+		if (!main_cmd_with_fork(cmd, env, envp)) //2d array cmd free처리 안에서 다 한다.
+			exit(1);
+		exit(0);
+	}
+	else
+	{	
+		if (!parent_process(pid, pipe_fd, p_status))
+			return (0);
+	}
+	return (1);
+}
+
+int process_cmd_without_fork(char ***cmds, t_list *env, char **envp, int *p_status)
+{
+	pid_t pid;
+	int status;
+	if ((*cmds)[0] == 0)
+		return (1);
+	if (!check_fd_aggregation(*cmds))
+		return (0);
+	if (!exec_builtin_cmds(*cmds, env))
+	{
+		
+		if ((pid = fork()) == -1)
+		{
+			ft_putendl_fd("FORK FAILED", 2);
+			return (0);
+		}
+		else if (pid == 0)
+		{
+			if (!cmd_not_builtins(*cmds, envp))
+				exit(1);
+			exit(0);
+		}
+		else
+		{		
+			waitpid(pid, &status, 0);
+			*p_status = status;
+		}
+	}
+	return (1);
+}
+
+int process_cmd(char ***cmds, t_list *env, char **envp, int *p_status)
+{
+	int i;
+	int redirection_flag;
+
+	i = 0;
+	while (cmds[i] != 0)
+		++i;
+	redirection_flag = 0;
+	int j = 0;
+	while (cmds[0][j] != 0)
+	{
+		if (has_redirection(cmds[0][j]))
+		{
+			redirection_flag = 1;
+			break ;
+		}
+		++j;
+	}
+	if (i == 1 && !redirection_flag)
+	{
+		process_cmd_without_fork(cmds, env, envp, p_status);
 		return (1);
 	}
-	printf("pipe_split\n");
-	cmds = pipe_split(args);
 	while (*cmds)
 	{
-		exec_args(*cmds, env);
+		if ((*cmds)[0] == 0)
+			return (1);
+		if (!check_fd_aggregation(*cmds))
+			return (0);
+		if (!process_cmds_with_fork(cmds, env, envp, p_status))
+				return (0);
 		++cmds;
 	}
 	return (1);
 }
 
-int exec_cmds(char *line, t_list *env)
+int exec_input(char *line, t_list *env, char **envp, int *p_status)
 {
-	int		i;	
-	char	**cmds;
+	int		i;
+	char	**inputs;
+	char	***cmds;
+	int		save[2];
 
 	if (only_semicolon(line))
 		return (1);
-	if (!(cmds = semicolon_split(line)))
+	if (!(inputs = semicolon_split(line)))
 		return (0);
-	i = 0;
-	while (cmds[i] != 0)
+	i = -1;
+	while (inputs[++i] != 0)
 	{
-		if (!process_cmd(cmds[i], env))
+		if (!(cmds = get_cmds_with_pipe_split(inputs[i], env)))
 		{
-			ft_free(cmds, i);
+			free_2d_array(inputs);
 			return (0);
 		}
-		++i;
+		save[0] = dup(0);
+		save[1] = dup(1);
+		if (!process_cmd(cmds, env, envp, p_status))
+		{
+			free_3d_array(cmds);
+			free_2d_array(inputs);
+			return (0);
+		}
+		dup2(save[0], 0);
+		dup2(save[1], 1);
 	}
-	ft_free(cmds, i);
+	free_3d_array(cmds);
+	free_2d_array(inputs);
 	return (1);
 }
 
@@ -1280,30 +1664,49 @@ t_list *copy_env(char **envp)
 	return (res);
 }
 
+void	sig_handler(int signo)
+{
+	if (signo == SIGINT)
+	{
+		ft_putendl_fd(" SIGINT!", 1);
+		ft_putstr_fd("> ", 1);
+		//exit(0);
+	}
+	if (signo == SIGQUIT)
+	{
+		ft_putendl_fd("SIGQUIT!", 1);
+		//exit(0);
+	}
+}
+
 int main(int argc, char **argv, char **envp)
 {
 	char	*line;
-	int status;
+	int		read_status;
+	int		p_status;
 	t_list	*env;
 
 	if (!argc || !argv || !envp)
 		return (0);
 	if (!(env = copy_env(envp)))
-		return (-1);
+		return (0);
+	signal(SIGINT, sig_handler);
+	signal(SIGQUIT, sig_handler);
 	line = 0;
 	ft_putstr_fd("> ", 1);
-	status = 1;
-	while (status != 0)
+	read_status = 1;
+	p_status = 0;
+	while (read_status > 0)
 	{
-		status = get_next_line(0, &line);
-		printf("status : %d\n", status);
-		if (!exec_cmds(line, env))
+		read_status = get_next_line(0, &line);
+		if (!exec_input(line, env, envp, &p_status))
 		{
 			free(line);
 			break;
 		}
 		free(line);
-		ft_putstr_fd("> ", 1);
+		if (read_status > 0)
+			ft_putstr_fd("> ", 1);
 	}
 	free(env);
 	return (0);
