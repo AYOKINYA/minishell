@@ -1252,7 +1252,8 @@ char	**tokens_into_args(t_list *tokens, t_list *env)
 	{
 		if (!(args[i] = tokens_into_args_body(tokens, env)))
 		{
-			ft_free(args, i);
+			// ft_free(args, i);
+			free_2d_array(args);
 			return (0);
 		}
 		++i;
@@ -1507,6 +1508,7 @@ char ***get_cmds_with_pipe_split(char *line, t_list *env)
 		free_2d_array(args);
 		return (0);
 	}
+	free_2d_array(args);
 	return (cmds);
 }
 
@@ -1718,14 +1720,29 @@ int exec_cmd_with_pipe(char *input, t_list *env, char **envp, int *p_status)
 int dollar_question(t_list *env, int *p_status)
 {
 	char *new;
+	char *var;
+	char *status;
 
-	if (!(new = ft_strdup("?=")))
+	if (!(status = ft_itoa(*p_status)))
 		return (0);
-	if (!(new = ft_strjoin(new , ft_itoa(*p_status))))
+	if (!(var = ft_strdup("?=")))
+	{
+		free(status);
 		return (0);
+	}
+	if (!(new = ft_strjoin(var, status)))
+	{
+		free(var);
+		free(status);
+		return (0);
+	}
 	free(env->content);
 	if (!(env->content = new))
+	{
+		free(status);
 		return (0);
+	}
+	free(status);
 	return (1);
 }
 
