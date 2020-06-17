@@ -22,14 +22,14 @@ static int	main_cmd_with_fork(char **cmd, t_list *env, char **envp, int *p_statu
 	if ((ret = exec_builtin_cmds(cmd, env, p_status)) == -1)
 	{
 		free_2d_array(cmd);
-		return(0);
+		return (0);
 	}
 	else if (ret == 0)
 	{
 		if (!(cmd_not_builtins(cmd, envp)))
 		{
 			free_2d_array(cmd);
-			return(0);
+			return (0);
 		}
 	}
 	free_2d_array(cmd);
@@ -43,7 +43,8 @@ int			process_cmds_with_fork(char ***cmds, t_list *env, char **envp, int *p_stat
 	int		pipe_fd[2];
 	char	**cmd;
 	
-	pipe(pipe_fd);
+	if (pipe(pipe_fd) == 1)
+		return (0);
 	if ((pid = fork()) == -1)
 	{
 		ft_putstr_fd("Fork is failed.", 2);

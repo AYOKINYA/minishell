@@ -62,6 +62,7 @@ static int	go_minishell_go(t_list *env, char **envp)
 		if (!exec_input(line, env, envp, &p_status))
 		{
 			free(line);
+			p_status = 1;
 			return (0);
 		}
 		free(line);

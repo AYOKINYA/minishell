@@ -34,8 +34,8 @@ int			process_cmd_without_fork(char ***cmds, t_list *env, char **envp, int *p_st
 	
 	if ((*cmds)[0] == 0)
 		return (1);
-	if (!check_fd_aggregation(*cmds))
-		return (0);
+	if (!check_fd_aggregation(*cmds, p_status))
+		return (1);
 	if (!(ret = exec_builtin_cmds(*cmds, env, p_status)))
 	{
 		if (!exec_not_builtin_cmds(*cmds, envp, p_status))

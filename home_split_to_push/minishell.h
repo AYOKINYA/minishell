@@ -64,7 +64,7 @@ char		**refine_cmd(char ***cmds, int pipe_fd[]);
 int			process_cmds_with_fork(char ***cmds, t_list *env, char **envp, int *p_status);
 int			process_cmd_without_fork(char ***cmds, t_list *env, char **envp, int *p_status);
 
-int			check_fd_aggregation(char **args);
+int			check_fd_aggregation(char **args, int *p_status);
 int			process_cmd(char ***cmds, t_list *env, char **envp, int *p_status);
 
 int			exec_input(char *line, t_list *env, char **envp, int *p_status);
