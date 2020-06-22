@@ -1,7 +1,7 @@
 NAME = minishell
 CC = gcc
 
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -g -Wall -Wextra -Werror
 
 SRCS =  minishell.c \
 		get_next_line.c\

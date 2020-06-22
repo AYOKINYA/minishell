@@ -31,8 +31,9 @@ static char	*get_env_path(char **envp)
 
 static char	*get_path(char *env_path, int path_len)
 {
-	char	*tmp;
+	//char	*slash;
 	char	*path;
+	char	*tmp;
 	
 	if (*env_path == '/')
 	{
@@ -41,14 +42,21 @@ static char	*get_path(char *env_path, int path_len)
 	}
 	else
 	{
-		if (!(tmp = ft_strdup("/")))
-			return (0);
+		// if (!(slash = ft_strdup("/")))
+		// 	return (0);
 		if (!(path = ft_substr(env_path, 0, path_len)))
+		{
+			//free(slash);
 			return (0);
-		if (!(path = ft_strjoin(tmp, path)))
+		}
+		tmp = path;
+		if (!(path = ft_strjoin_without_free("/", path)))
+		{
+			//free(slash);
 			return (0);
+		}
+		free(tmp);
 	}
-
 	return (path);
 }
 
@@ -60,9 +68,15 @@ static int	exec_with_path(char **tokens, char **envp, char *env_path, int path_l
 	if (!(path = get_path(env_path, path_len)))
 		return (0);
 	if (!(path = ft_strjoin(path, "/")))
+	{
+		free(path);
 		return (0);
+	}
 	if (!(path = ft_strjoin(path, tokens[0])))
+	{
+		free(path);
 		return (0);
+	}
 	ret = execve(path, tokens, envp);
 	free(path);
 	if (ret >= 0)
