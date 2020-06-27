@@ -20,7 +20,7 @@ int	cmd_not_builtins(char **tokens, char **envp)
 		{
 			ft_putstr_fd(tokens[0], 2);
 			ft_putendl_fd(": command not found", 2);
-			exit(1);
+			exit(127);
 		}
 	}
 	else
@@ -31,7 +31,7 @@ int	cmd_not_builtins(char **tokens, char **envp)
 		{
 			ft_putstr_fd(tokens[0], 2);
 			ft_putendl_fd(": command not found", 2);
-			exit(1);
+			exit(127);
 		}
 	}
 	return (1);

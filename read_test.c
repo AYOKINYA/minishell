@@ -15,18 +15,48 @@ int ft_strlen(char *s)
 	}
 	return (i);
 }
-int main(int arg, char **argv)
+
+int get_line()
 {
+	int before_eof;
 	char buf[100 + 1];
 	int ret;
 
-	while ((ret = read(0, buf, 100)) > 0)
+	before_eof = 0;
+	if (before_eof)
 	{
-		buf[ret] = '\0';
+		while ((ret = read(0, buf, 100)) > 0)
+		{
+			buf[ret] = '\0';
+			printf("%s\n" , buf);
+			printf("ret %d\n" , ret);
+		}
+		return (0);
+	}
+	else
+	{
+		while ((ret = read(0, buf, 100)) > 0)
+		{
+			buf[ret] = '\0';
+			printf("%s\n" , buf);
+			printf("ret %d\n" , ret);
+		}
 		if (ret == 0 && ft_strlen(buf))
-			ret = 1;
-		printf("%s\n" , buf);
-		printf("ret %d\n" , ret);
+		{
+			before_eof = 1;
+			return 1;
+		}
+	}
+	return (ret);
+}
+int main(int arg, char **argv)
+{
+	
+	while (1)
+	{
+		if (get_line() == 0)
+			return (0);
+		printf("hi\n");
 	}
 	return (0);
 }

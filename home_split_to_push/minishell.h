@@ -68,4 +68,7 @@ int			check_fd_aggregation(char **args, int *p_status);
 int			process_cmd(char ***cmds, t_list *env, char **envp, int *p_status);
 
 int			exec_input(char *line, t_list *env, char **envp, int *p_status);
+
+int			g_sig_status;
+
 #endif
