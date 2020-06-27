@@ -55,7 +55,6 @@ static int	go_minishell_go(t_list *env, char **envp)
 	line = 0;
 	read_status = 1;
 	p_status = 0;
-
 	while (read_status > 0)
 	{
 		read_status = get_next_line(0, &line);
@@ -65,9 +64,10 @@ static int	go_minishell_go(t_list *env, char **envp)
 			p_status = 1;
 			return (0);
 		}
-		free(line);
 		if (read_status > 0)
 			ft_putstr_fd("> ", 1);
+		else if (read_status == -1)
+			return (0);
 	}
 	return (1);
 }

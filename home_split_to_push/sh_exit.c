@@ -25,6 +25,9 @@ int sh_exit(char **tokens, int *p_status)
 		*p_status = 1;
 	}
 	else
+	{
+		ft_putstr_fd("bash: exit: numeric argument required\n", 2);
 		exit(2);
+	}
 	return (1);
 }

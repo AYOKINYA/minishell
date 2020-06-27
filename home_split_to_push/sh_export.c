@@ -58,6 +58,18 @@ static int	sh_export_body(char **tokens, t_list *env, int i)
 	return (1);
 }
 
+static void print_env_w_declare(t_list *env)
+{
+	env = env->next;
+	while (env != 0)
+	{
+		
+		ft_putstr_fd("declare -x ", 1);
+		ft_putendl_fd(env->content, 1);
+		env = env->next;
+	}
+}
+
 int			sh_export(char **tokens, t_list *env, int *p_status)
 {
 	int		i;
@@ -65,7 +77,7 @@ int			sh_export(char **tokens, t_list *env, int *p_status)
 	
 	token_count = count_tokens(tokens);
 	if (token_count == 1)
-		sh_env(tokens, env, p_status);
+		print_env_w_declare(env);
 	else
 	{
 		i = 0;
