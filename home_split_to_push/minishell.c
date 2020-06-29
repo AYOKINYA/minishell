@@ -31,15 +31,16 @@ static void	sig_handler(int signo)
 {
 	if (signo == SIGINT)
 	{
+		g_sig_status = 1;
 		ft_putendl_fd(" SIGINT!", 1);
 		ft_putstr_fd("> ", 1);
 	}
 	if (signo == SIGQUIT)
 	{
 		ft_putendl_fd("SIGQUIT!", 1);
+		exit(0);
 	}
 }
-
 static void	welcome(void)
 {
 	ft_putendl_fd("Hi, it's jkang's minishell.", 1);
@@ -70,6 +71,9 @@ static int	go_minishell_go(t_list *env, char **envp)
 			return (0);
 		free(line);
 		line = 0;
+		if (p_status == 130)
+			g_sig_status = 0;
+		free(line);
 	}
 	return (1);
 }

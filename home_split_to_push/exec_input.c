@@ -77,6 +77,8 @@ int			exec_input(char *line, t_list *env, char **envp, int *p_status)
 	i = -1;
 	while (inputs[++i] != 0)
 	{
+		if (g_sig_status == 1)
+			*p_status = 130;
 		if (!dollar_question(env, p_status))
 			return (0);
 		if (!split_pipe_and_process_cmd(inputs[i], env, envp, p_status))
@@ -84,6 +86,8 @@ int			exec_input(char *line, t_list *env, char **envp, int *p_status)
 			free_2d_array(inputs);
 			return (0);
 		}
+		if (g_sig_status == 1)
+			g_sig_status = 0;
 	}
 	free_2d_array(inputs);
 	return (1);
