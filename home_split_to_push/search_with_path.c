@@ -15,6 +15,7 @@ static char	*get_env_path(char **envp)
 {
 	char *env_path;
 	
+	env_path = 0;
 	while (*envp != 0)
 	{
 		if (ft_strncmp(*envp, "PATH=", 5) == 0)

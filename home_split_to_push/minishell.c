@@ -68,6 +68,8 @@ static int	go_minishell_go(t_list *env, char **envp)
 			ft_putstr_fd("> ", 1);
 		else if (read_status == -1)
 			return (0);
+		free(line);
+		line = 0;
 	}
 	return (1);
 }
