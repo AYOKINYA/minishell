@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   exec_builtin_cmds.c                                :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/06/30 15:13:13 by jkang             #+#    #+#             */
+/*   Updated: 2020/06/30 15:13:42 by jkang            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
 int	count_tokens(char **tokens)
@@ -14,7 +26,8 @@ int	cmd_not_builtins(char **tokens, char **envp)
 {
 	int ret;
 
-	if (ft_strncmp(tokens[0], "/", 1) == 0 || ft_strncmp(tokens[0], "/", 1) == 0)
+	if (ft_strncmp(tokens[0], "/", 1) == 0 ||\
+								ft_strncmp(tokens[0], "/", 1) == 0)
 	{
 		if ((ret = execve(tokens[0], tokens, envp)) == -1)
 		{

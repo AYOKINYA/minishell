@@ -1,9 +1,21 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   sh_export.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/06/30 16:41:10 by jkang             #+#    #+#             */
+/*   Updated: 2020/06/30 16:41:12 by jkang            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
 static int	export_new_var(char *token, t_list *env)
 {
 	t_list	*new;
-	
+
 	if (!(new = (t_list *)malloc(sizeof(t_list))))
 		return (0);
 	if (!(new->content = ft_strdup(token)))
@@ -19,7 +31,7 @@ static int	export_new_var(char *token, t_list *env)
 static int	is_var_already(char *token, t_list *env)
 {
 	t_list	*tmp;
-	int len;
+	int		len;
 
 	tmp = env;
 	while (tmp != 0)
@@ -41,7 +53,6 @@ static int	is_var_already(char *token, t_list *env)
 
 static int	sh_export_body(char **tokens, t_list *env, int i)
 {
-
 	if (ft_strlen(tokens[i]) == 1)
 	{
 		ft_putendl_fd("bash: export: `=': not a valid identifier", 2);
@@ -58,12 +69,11 @@ static int	sh_export_body(char **tokens, t_list *env, int i)
 	return (1);
 }
 
-static void print_env_w_declare(t_list *env)
+static void	print_env_w_declare(t_list *env)
 {
 	env = env->next;
 	while (env != 0)
 	{
-		
 		ft_putstr_fd("declare -x ", 1);
 		ft_putendl_fd(env->content, 1);
 		env = env->next;
@@ -74,7 +84,7 @@ int			sh_export(char **tokens, t_list *env, int *p_status)
 {
 	int		i;
 	int		token_count;
-	
+
 	token_count = count_tokens(tokens);
 	if (token_count == 1)
 		print_env_w_declare(env);

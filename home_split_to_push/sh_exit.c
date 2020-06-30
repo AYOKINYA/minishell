@@ -1,6 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   sh_exit.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/06/30 15:24:38 by jkang             #+#    #+#             */
+/*   Updated: 2020/06/30 15:24:40 by jkang            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
-static int is_numeric(char *s)
+static int	is_numeric(char *s)
 {
 	while (*s != 0)
 	{
@@ -11,7 +23,7 @@ static int is_numeric(char *s)
 	return (1);
 }
 
-int sh_exit(char **tokens, int *p_status)
+int			sh_exit(char **tokens, int *p_status)
 {
 	int token_count;
 

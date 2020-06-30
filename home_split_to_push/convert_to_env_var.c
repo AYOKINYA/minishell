@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   convert_to_env_var.c                               :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/06/30 15:12:35 by jkang             #+#    #+#             */
+/*   Updated: 2020/06/30 15:12:36 by jkang            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
 static int	add_var(char **s, t_list *env, char **res)
@@ -5,7 +17,7 @@ static int	add_var(char **s, t_list *env, char **res)
 	int		i;
 	char	*copy;
 
-	++(*s); // $ 다음 문자로 넘어간다.
+	++(*s);
 	if (**s == '\0')
 		return (1);
 	copy = *s;
@@ -17,7 +29,8 @@ static int	add_var(char **s, t_list *env, char **res)
 	}
 	while (env != 0)
 	{
-		if (ft_strncmp(env->content, copy, i) == 0 && ((char *)env->content)[i] == '=')
+		if (ft_strncmp(env->content, copy, i) == 0 &&\
+											((char *)env->content)[i] == '=')
 			get_value(env->content, res);
 		env = env->next;
 	}
@@ -30,7 +43,7 @@ static int	var_len(char **s, t_list *env)
 	int		value_len;
 	char	*copy;
 
-	++(*s); // $ 다음 문자로 넘어간다.
+	++(*s);
 	if (**s == '\0')
 		return (0);
 	copy = *s;
@@ -43,7 +56,8 @@ static int	var_len(char **s, t_list *env)
 	}
 	while (env != 0)
 	{
-		if (ft_strncmp(env->content, copy, i) == 0 && ((char *)env->content)[i] == '=')
+		if (ft_strncmp(env->content, copy, i) == 0 &&\
+											((char *)env->content)[i] == '=')
 			value_len = get_value_len(env->content);
 		env = env->next;
 	}
@@ -74,7 +88,7 @@ char		*convert_var_to_value(char *content, t_list *env)
 	char	*s;
 	char	*res;
 	char	*ret;
-	
+
 	s = content;
 	len = converted_len(s, env);
 	if (!(ret = (char *)malloc(sizeof(char) * (len + 1))))

@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   sh_unset.c                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/06/30 16:42:11 by jkang             #+#    #+#             */
+/*   Updated: 2020/06/30 16:42:12 by jkang            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
 static int	is_alpha_num(char *s)
@@ -25,7 +37,7 @@ static int	is_var(char *token, t_list *env)
 		while (var[i] != '=')
 		{
 			if (var[i] != token[i])
-				break;
+				break ;
 			++i;
 		}
 		tmp = tmp->next;
@@ -78,7 +90,7 @@ static int	sh_unset_body(char **tokens, int token_count, t_list *env)
 int			sh_unset(char **tokens, t_list *env, int *p_status)
 {
 	int token_count;
-	
+
 	token_count = 0;
 	while (tokens[token_count] != 0)
 		++token_count;

@@ -1,8 +1,20 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   validate_redirection.c                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/06/30 15:28:34 by jkang             #+#    #+#             */
+/*   Updated: 2020/06/30 16:43:27 by jkang            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
 int			is_redirection(char c)
 {
-	if (c == '<' * -1 || c == '>' * -1 || c == '|' * -1 )
+	if (c == '<' * -1 || c == '>' * -1 || c == '|' * -1)
 		return (1);
 	return (0);
 }
@@ -20,16 +32,16 @@ int			has_redirection(char *arg)
 
 static int	investigate_redirection(char **args, int i)
 {
-	if (args[i + 1] == 0 || ft_strlen(args[i]) > 2) //redirection 다음 arg 없을 때!
+	if (args[i + 1] == 0 || ft_strlen(args[i]) > 2)
 	{
-		ft_putendl_fd("syntax error!", 2);	
+		ft_putendl_fd("syntax error!", 2);
 		return (0);
 	}
 	else if (ft_strlen(args[i]) == 2)
 	{
 		if (args[i][0] != '>' * -1 || args[i][1] != '>' * -1)
 		{
-			ft_putendl_fd("syntax error!", 2);	
+			ft_putendl_fd("syntax error!", 2);
 			return (0);
 		}
 	}

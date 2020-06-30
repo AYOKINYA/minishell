@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   process_cmds_with_fork.c                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/06/30 15:21:30 by jkang             #+#    #+#             */
+/*   Updated: 2020/06/30 16:38:39 by jkang            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
 static int	parent_process(pid_t pid, int *pipe_fd, int *p_status)
@@ -15,7 +27,8 @@ static int	parent_process(pid_t pid, int *pipe_fd, int *p_status)
 	return (1);
 }
 
-static int	main_cmd_with_fork(char **cmd, t_list *env, char **envp, int *p_status)
+static int	main_cmd_with_fork(char **cmd, t_list *env, char **envp,\
+														int *p_status)
 {
 	int ret;
 
@@ -36,13 +49,13 @@ static int	main_cmd_with_fork(char **cmd, t_list *env, char **envp, int *p_statu
 	return (1);
 }
 
-
-int			process_cmds_with_fork(char ***cmds, t_list *env, char **envp, int *p_status)
+int			process_cmds_with_fork(char ***cmds, t_list *env, char **envp,\
+															int *p_status)
 {
 	pid_t	pid;
 	int		pipe_fd[2];
 	char	**cmd;
-	
+
 	if (pipe(pipe_fd) == 1)
 		return (0);
 	if ((pid = fork()) == -1)
@@ -54,12 +67,12 @@ int			process_cmds_with_fork(char ***cmds, t_list *env, char **envp, int *p_stat
 	{
 		if (!(cmd = refine_cmd(cmds, pipe_fd)))
 			exit(1);
-		if (!main_cmd_with_fork(cmd, env, envp, p_status)) //2d array cmd free처리 안에서 다 한다.
+		if (!main_cmd_with_fork(cmd, env, envp, p_status))
 			exit(1);
 		exit(0);
 	}
 	else
-	{	
+	{
 		if (!parent_process(pid, pipe_fd, p_status))
 			return (0);
 	}

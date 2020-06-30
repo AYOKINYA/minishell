@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   process_cmd.c                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/06/30 15:21:34 by jkang             #+#    #+#             */
+/*   Updated: 2020/06/30 15:21:35 by jkang            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
 int			check_fd_aggregation(char **args, int *p_status)
@@ -16,7 +28,7 @@ int			check_fd_aggregation(char **args, int *p_status)
 			if (args[i][j] == '<' * -1 || args[i][j] == '>' * -1)
 				++count;
 			if (args[i][j] == '>' * -1 && args[i][j + 1] == '>' * -1)
-				count -= 1;	
+				count -= 1;
 			++j;
 		}
 	}

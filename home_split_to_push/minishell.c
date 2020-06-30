@@ -1,6 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   minishell.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/06/30 15:16:41 by jkang             #+#    #+#             */
+/*   Updated: 2020/06/30 16:43:01 by jkang            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
-static		t_list *copy_env(char **envp)
+static t_list	*copy_env(char **envp)
 {
 	int		i;
 	t_list	*res;
@@ -27,7 +39,7 @@ static		t_list *copy_env(char **envp)
 	return (res);
 }
 
-static void	sig_handler(int signo)
+static void		sig_handler(int signo)
 {
 	if (signo == SIGINT)
 	{
@@ -41,13 +53,14 @@ static void	sig_handler(int signo)
 		exit(0);
 	}
 }
-static void	welcome(void)
+
+static void		welcome(void)
 {
 	ft_putendl_fd("Hi, it's jkang's minishell.", 1);
 	ft_putstr_fd("> ", 1);
 }
 
-static int	go_minishell_go(t_list *env, char **envp)
+static int		go_minishell_go(t_list *env, char **envp)
 {
 	char	*line;
 	int		p_status;
@@ -69,8 +82,6 @@ static int	go_minishell_go(t_list *env, char **envp)
 			ft_putstr_fd("> ", 1);
 		else if (read_status == -1)
 			return (0);
-		free(line);
-		line = 0;
 		if (p_status == 130)
 			g_sig_status = 0;
 		free(line);
@@ -78,9 +89,8 @@ static int	go_minishell_go(t_list *env, char **envp)
 	return (1);
 }
 
-int			main(int argc, char **argv, char **envp)
+int				main(int argc, char **argv, char **envp)
 {
-	
 	t_list	*env;
 
 	if (!argc || !argv || !envp)

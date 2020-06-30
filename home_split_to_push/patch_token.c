@@ -1,12 +1,23 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   patch_token.c                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/06/30 15:17:37 by jkang             #+#    #+#             */
+/*   Updated: 2020/06/30 15:17:37 by jkang            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
 void		quote_mark(int *quote, char c)
 {
 	if (*quote == 0 && (c == '\'' || c == '\"'))
-		*quote = c;	
+		*quote = c;
 	else if (*quote != 0 && *quote == c)
-		*quote = 0;			
-
+		*quote = 0;
 }
 
 static int	is_exception(char c, char *except_str)
@@ -65,7 +76,7 @@ int			patch_token(char *res, t_list *tokens)
 {
 	int		mix;
 	t_list	*token;
-	
+
 	mix = redirection_with_chars(res);
 	if (mix == 1)
 	{

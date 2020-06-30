@@ -1,6 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   sh_env.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/06/30 15:08:44 by jkang             #+#    #+#             */
+/*   Updated: 2020/06/30 15:24:16 by jkang            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
-int sh_env(char **tokens, t_list *env, int *p_status)
+int	sh_env(char **tokens, t_list *env, int *p_status)
 {
 	int token_count;
 

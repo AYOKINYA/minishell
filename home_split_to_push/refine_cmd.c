@@ -1,10 +1,22 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   refine_cmd.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/06/30 15:26:35 by jkang             #+#    #+#             */
+/*   Updated: 2020/06/30 15:26:35 by jkang            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
 static char	**get_cmd(char **cmd, int redirection)
 {
-	int count;
-	int i;
-	char **res;
+	int		count;
+	int		i;
+	char	**res;
 
 	count = 0;
 	while (cmd[count] != 0)
@@ -38,7 +50,7 @@ static int	check_redirection(char **cmd, int *file_fd)
 	{
 		if (**cmd == '>' * -1 && *(*cmd + 1) != '>' * -1)
 			redirection = 1;
-		else if (**cmd == '>' * -1 &&  *(*cmd + 1) == '>' * -1)
+		else if (**cmd == '>' * -1 && *(*cmd + 1) == '>' * -1)
 			redirection = 2;
 		else if (**cmd == '<' * -1)
 			redirection = 3;
@@ -51,16 +63,17 @@ static int	check_redirection(char **cmd, int *file_fd)
 	else if (redirection == 2)
 		*file_fd = open(*(cmd + 1), O_RDWR | O_APPEND | S_IROTH, 0644);
 	else if (redirection == 3)
-		*file_fd = open(*(cmd + 1) , O_RDONLY);
+		*file_fd = open(*(cmd + 1), O_RDONLY);
 	else
 		*file_fd = 1;
 	return (redirection);
 }
 
-static int	process_pipe_and_redirection(char ***cmds, int *pipe_fd, int *redirection)
+static int	process_pipe_and_redirection(char ***cmds, int *pipe_fd,\
+													int *redirection)
 {
 	int file_fd;
-	
+
 	close(pipe_fd[0]);
 	if (*(cmds + 1) != 0)
 		dup2(pipe_fd[1], 1);
@@ -85,7 +98,7 @@ char		**refine_cmd(char ***cmds, int pipe_fd[])
 
 	if (!process_pipe_and_redirection(cmds, pipe_fd, &redirection))
 		return (0);
-	if (!(cmd = get_cmd(*cmds, redirection))) // redirection과 child process pipe 처리 거친 명령어 ex) echo hi, ls, ...
+	if (!(cmd = get_cmd(*cmds, redirection)))
 		return (0);
 	return (cmd);
 }

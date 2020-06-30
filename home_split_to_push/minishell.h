@@ -1,9 +1,17 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   minishell.h                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/06/30 16:45:08 by jkang             #+#    #+#             */
+/*   Updated: 2020/06/30 16:45:09 by jkang            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef MINISHELL_H
 # define MINISHELL_H
-
-# ifndef BUFFER_SIZE
-#  define BUFFER_SIZE 13
-# endif
 
 # include "./libft/libft.h"
 # include <unistd.h>
@@ -56,13 +64,15 @@ char		**tokenize(char *line, t_list *env);
 void		get_value(char *env_content, char **res);
 int			get_value_len(char *env_content);
 
-int		is_env_var(char *content);
-char	*convert_var_to_value(char *content, t_list *env);
+int			is_env_var(char *content);
+char		*convert_var_to_value(char *content, t_list *env);
 
 char		**refine_cmd(char ***cmds, int pipe_fd[]);
 
-int			process_cmds_with_fork(char ***cmds, t_list *env, char **envp, int *p_status);
-int			process_cmd_without_fork(char ***cmds, t_list *env, char **envp, int *p_status);
+int			process_cmds_with_fork(char ***cmds, t_list *env, char **envp,\
+															int *p_status);
+int			process_cmd_without_fork(char ***cmds, t_list *env, char **envp,\
+															int *p_status);
 
 int			check_fd_aggregation(char **args, int *p_status);
 int			process_cmd(char ***cmds, t_list *env, char **envp, int *p_status);
@@ -70,5 +80,4 @@ int			process_cmd(char ***cmds, t_list *env, char **envp, int *p_status);
 int			exec_input(char *line, t_list *env, char **envp, int *p_status);
 
 int			g_sig_status;
-
 #endif

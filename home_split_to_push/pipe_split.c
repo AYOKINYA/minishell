@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   pipe_split.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/06/30 15:14:10 by jkang             #+#    #+#             */
+/*   Updated: 2020/06/30 16:34:14 by jkang            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
 static int	count_cmds(char **args)
@@ -34,9 +46,9 @@ static char	**pipe_split_body(char ***args)
 	int		j;
 	int		args_count;
 	char	**res;
-	
+
 	args_count = count_args(*args);
-	if (!(res = (char **)malloc(sizeof(char *) *(args_count + 1))))
+	if (!(res = (char **)malloc(sizeof(char *) * (args_count + 1))))
 		return (0);
 	res[args_count] = 0;
 	j = -1;
@@ -52,7 +64,7 @@ static char	**pipe_split_body(char ***args)
 	return (res);
 }
 
-char	***pipe_split(char **args)
+char		***pipe_split(char **args)
 {
 	int		cmds_count;
 	int		i;

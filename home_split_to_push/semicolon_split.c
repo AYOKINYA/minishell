@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   semicolon_split.c                                  :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/06/30 15:23:58 by jkang             #+#    #+#             */
+/*   Updated: 2020/06/30 15:23:59 by jkang            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
 static int	ft_num_cmds(char *line)
@@ -21,7 +33,7 @@ static int	ft_cmd_len(char *line)
 {
 	int cmd_len;
 	int quote;
-	
+
 	cmd_len = 0;
 	quote = 0;
 	while (*line != '\0')
@@ -37,9 +49,9 @@ static int	ft_cmd_len(char *line)
 
 int			only_semicolon(char *line)
 {
-	int semicolon_count;
-	int i;
-	char *start;
+	int		semicolon_count;
+	int		i;
+	char	*start;
 
 	semicolon_count = 0;
 	i = 0;
