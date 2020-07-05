@@ -3,14 +3,25 @@
 /*                                                        :::      ::::::::   */
 /*   tokenize.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
+/*   By: jkang <jkang@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/30 16:41:47 by jkang             #+#    #+#             */
-/*   Updated: 2020/06/30 16:41:47 by jkang            ###   ########.fr       */
+/*   Updated: 2020/07/05 16:22:35 by jkang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+int			is_env_var(char *content)
+{
+	while (*content != '\0')
+	{
+		if (*content == '$' * -1)
+			return (1);
+		++content;
+	}
+	return (0);
+}
 
 static char	*tokens_into_args_body(t_list *tokens, t_list *env)
 {

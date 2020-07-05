@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
+/*   By: jkang <jkang@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/30 16:45:08 by jkang             #+#    #+#             */
-/*   Updated: 2020/06/30 16:45:09 by jkang            ###   ########.fr       */
+/*   Updated: 2020/07/05 13:52:59 by jkang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,10 @@ int			sh_exit(char **tokens, int *p_status);
 int			sh_env(char **tokens, t_list *env, int *p_status);
 int			sh_pwd(int *p_status);
 int			sh_cd(char **tokens, t_list *env, int *p_status);
+
+int			export_new_var(char *token, t_list *env);
+int			is_var_already(char *token, t_list *env);
+int			is_not_valid(char *s, char until);
 int			sh_export(char **tokens, t_list *env, int *p_status);
 int			sh_unset(char **tokens, t_list *env, int *p_status);
 int			search_with_path(char **tokens, char **envp);

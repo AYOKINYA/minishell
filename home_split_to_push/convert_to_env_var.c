@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   convert_to_env_var.c                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
+/*   By: jkang <jkang@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/30 15:12:35 by jkang             #+#    #+#             */
-/*   Updated: 2020/06/30 15:12:36 by jkang            ###   ########.fr       */
+/*   Updated: 2020/07/05 16:20:17 by jkang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,6 +82,38 @@ static int	converted_len(char *s, t_list *env)
 	return (len);
 }
 
+// static int	valid_substitution(char *s, int *p_status)
+// {
+// 	int n_open_bracket;
+// 	int n_close_bracket;
+
+// 	n_open_bracket = 0;
+// 	n_close_bracket = 0;
+// 	while (*s != '\0')
+// 	{
+// 		if (*s == '{')
+// 			++n_open_bracket;
+// 		else if (*s != '}')
+// 			++n_close_bracket;
+// 		++s;
+// 	}
+// 	if (n_open_bracket > 1 || n_close_bracket > 1)
+// 	{
+// 		ft_putstr_fd("bash: ", 2);
+// 		ft_putstr_fd(s, 2);
+// 		ft_putendl_fd(": bad substitution", 2);
+// 		*p_status = 1;
+// 		return (0);
+// 	}
+// 	else if (n_open_bracket != n_close_bracket)
+// 	{
+// 		ft_putendl_fd("syntax error! not a proper bracket", 2);
+// 		*p_status = 1;
+// 		return (0);
+// 	}
+// 	return (1);
+// }
+
 char		*convert_var_to_value(char *content, t_list *env)
 {
 	int		len;
@@ -107,15 +139,4 @@ char		*convert_var_to_value(char *content, t_list *env)
 		}
 	}
 	return (ret);
-}
-
-int			is_env_var(char *content)
-{
-	while (*content != '\0')
-	{
-		if (*content == '$' * -1)
-			return (1);
-		++content;
-	}
-	return (0);
 }

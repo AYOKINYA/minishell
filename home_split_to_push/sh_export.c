@@ -3,63 +3,49 @@
 /*                                                        :::      ::::::::   */
 /*   sh_export.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
+/*   By: jkang <jkang@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/30 16:41:10 by jkang             #+#    #+#             */
-/*   Updated: 2020/06/30 16:41:12 by jkang            ###   ########.fr       */
+/*   Updated: 2020/07/05 13:56:25 by jkang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-static int	export_new_var(char *token, t_list *env)
+static int	has_alpha(char *s, char until)
 {
-	t_list	*new;
-
-	if (!(new = (t_list *)malloc(sizeof(t_list))))
-		return (0);
-	if (!(new->content = ft_strdup(token)))
+	while (*s != until)
 	{
-		free(new);
-		return (0);
-	}
-	new->next = 0;
-	ft_lstadd_back(&env, new);
-	return (1);
-}
-
-static int	is_var_already(char *token, t_list *env)
-{
-	t_list	*tmp;
-	int		len;
-
-	tmp = env;
-	while (tmp != 0)
-	{
-		len = 0;
-		while (token[len] != '=')
-			++len;
-		if (ft_strncmp(tmp->content, token, len) == 0)
-		{
-			free(tmp->content);
-			if (!(tmp->content = ft_strdup(token)))
-				return (0);
+		if (ft_isalpha(*s))
 			return (1);
-		}
-		tmp = tmp->next;
+		++s;
 	}
 	return (0);
 }
 
+static void export_err_msg(char *token)
+{
+	ft_putstr_fd("bash: export: `", 2);
+	ft_putstr_fd(token, 2);
+	ft_putendl_fd("': not a valid identifier", 2);
+}
+
 static int	sh_export_body(char **tokens, t_list *env, int i)
 {
-	if (ft_strlen(tokens[i]) == 1)
+	if (ft_strlen(tokens[i]) == 1 && ft_strchr(tokens[i], '_'))
+		return (1);
+	else if ((ft_strchr(tokens[i], '=') == 0 && !has_alpha(tokens[i], '\0')) || is_not_valid(tokens[i], '='))
 	{
-		ft_putendl_fd("bash: export: `=': not a valid identifier", 2);
+		export_err_msg(tokens[i]);
 		return (-1);
 	}
-	else
+	else if (ft_strchr(tokens[i], '=') != 0)
 	{
+		if (!has_alpha(tokens[i], '='))
+		{
+			export_err_msg(tokens[i]);
+			return (-1);
+		}	
 		if (!is_var_already(tokens[i], env))
 		{
 			if (!export_new_var(tokens[i], env))
@@ -84,6 +70,7 @@ int			sh_export(char **tokens, t_list *env, int *p_status)
 {
 	int		i;
 	int		token_count;
+	int		ret;
 
 	token_count = count_tokens(tokens);
 	if (token_count == 1)
@@ -93,14 +80,13 @@ int			sh_export(char **tokens, t_list *env, int *p_status)
 		i = 0;
 		while (++i < token_count)
 		{
-			if (ft_strchr(tokens[i], '=') != 0)
+			if (!(ret = sh_export_body(tokens, env, i)))
 			{
-				if (!sh_export_body(tokens, env, i))
-				{
-					*p_status = 1;
-					return (0);
-				}
+				*p_status = 1;
+				return (0);
 			}
+			else if (ret == -1)
+				*p_status = 1;
 		}
 	}
 	*p_status = 0;

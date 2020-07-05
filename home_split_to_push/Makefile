@@ -11,6 +11,7 @@ SRCS =  minishell.c \
 		sh_pwd.c\
 		sh_cd.c\
 		sh_export.c\
+		sh_export_2.c\
 		sh_unset.c\
 		search_with_path.c\
 		free.c\
