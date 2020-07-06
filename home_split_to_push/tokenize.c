@@ -6,7 +6,7 @@
 /*   By: jkang <jkang@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/30 16:41:47 by jkang             #+#    #+#             */
-/*   Updated: 2020/07/05 16:22:35 by jkang            ###   ########.fr       */
+/*   Updated: 2020/07/06 18:17:23 by jkang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,35 +63,6 @@ static char	**tokens_into_args(t_list *tokens, t_list *env)
 	}
 	args[i] = 0;
 	return (args);
-}
-
-static int	cmds_into_tokens(char *line, t_list *tokens)
-{
-	int		quote;
-	char	*res;
-
-	quote = 0;
-	while (*line != '\0')
-	{
-		quote_mark(&quote, *line);
-		while (*line == ' ' || *line == '\t')
-			++line;
-		if (quote == 0)
-			res = read_unquoted_token(&quote, &line);
-		else
-			res = read_quoted_token(&quote, &line);
-		if (res == 0)
-			return (0);
-		else
-		{
-			if (!patch_token(res, tokens))
-				return (0);
-		}
-		if (*line == '\0')
-			break ;
-		++line;
-	}
-	return (1);
 }
 
 char		**tokenize(char *line, t_list *env)

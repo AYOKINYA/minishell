@@ -6,7 +6,7 @@
 /*   By: jkang <jkang@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/30 16:45:08 by jkang             #+#    #+#             */
-/*   Updated: 2020/07/05 13:52:59 by jkang            ###   ########.fr       */
+/*   Updated: 2020/07/06 17:44:10 by jkang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,8 @@ char		*read_unquoted_token(int *quote, char **line);
 void		quote_mark(int *quote, char c);
 char		*exception_substr(char *from, int len, char *except_str);
 int			patch_token(char *res, t_list *tokens);
+
+int			cmds_into_tokens(char *line, t_list *tokens);
 
 int			is_redirection(char c);
 int			has_redirection(char *arg);

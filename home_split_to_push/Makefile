@@ -30,7 +30,8 @@ SRCS =  minishell.c \
 		process_cmds_without_fork.c\
 		process_cmd.c\
 		exec_input.c\
-		exec_builtin_cmds.c
+		exec_builtin_cmds.c\
+		cmds_into_tokens.c
 
 OBJS = $(SRCS:.c=.o)
 
