@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   sh_export_2.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jkang <jkang@student.42seoul.kr>           +#+  +:+       +#+        */
+/*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/07/05 13:12:15 by jkang             #+#    #+#             */
-/*   Updated: 2020/07/05 13:55:32 by jkang            ###   ########.fr       */
+/*   Updated: 2020/07/07 19:38:05 by jkang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int is_not_valid(char *s, char until)
+int	is_not_valid(char *s, char until)
 {
 	while (*s != until)
 	{

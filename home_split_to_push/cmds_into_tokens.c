@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cmds_into_tokens.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jkang <jkang@student.42seoul.kr>           +#+  +:+       +#+        */
+/*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/07/06 17:43:27 by jkang             #+#    #+#             */
-/*   Updated: 2020/07/06 18:17:32 by jkang            ###   ########.fr       */
+/*   Updated: 2020/07/07 19:36:46 by jkang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ int	cmds_into_tokens(char *line, t_list *tokens)
 	int		quote;
 	char	*res;
 	char	*tmp;
-	
+
 	quote = 0;
 	if (!(res = ft_strdup("")))
 		return (0);
@@ -70,7 +70,7 @@ int	cmds_into_tokens(char *line, t_list *tokens)
 		if (!(res = join_and_patch(res, tmp, line, tokens)))
 			return (0);
 		if (*line == '\0')
-			break;
+			break ;
 		++line;
 	}
 	free(res);

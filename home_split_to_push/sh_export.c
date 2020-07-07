@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   sh_export.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jkang <jkang@student.42seoul.kr>           +#+  +:+       +#+        */
+/*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/30 16:41:10 by jkang             #+#    #+#             */
-/*   Updated: 2020/07/05 13:56:25 by jkang            ###   ########.fr       */
+/*   Updated: 2020/07/07 19:38:50 by jkang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ static int	has_alpha(char *s, char until)
 	return (0);
 }
 
-static void export_err_msg(char *token)
+static void	export_err_msg(char *token)
 {
 	ft_putstr_fd("bash: export: `", 2);
 	ft_putstr_fd(token, 2);
@@ -34,7 +34,8 @@ static int	sh_export_body(char **tokens, t_list *env, int i)
 {
 	if (ft_strlen(tokens[i]) == 1 && ft_strchr(tokens[i], '_'))
 		return (1);
-	else if ((ft_strchr(tokens[i], '=') == 0 && !has_alpha(tokens[i], '\0')) || is_not_valid(tokens[i], '='))
+	else if ((ft_strchr(tokens[i], '=') == 0 && !has_alpha(tokens[i], '\0'))\
+								|| is_not_valid(tokens[i], '='))
 	{
 		export_err_msg(tokens[i]);
 		return (-1);
@@ -45,7 +46,7 @@ static int	sh_export_body(char **tokens, t_list *env, int i)
 		{
 			export_err_msg(tokens[i]);
 			return (-1);
-		}	
+		}
 		if (!is_var_already(tokens[i], env))
 		{
 			if (!export_new_var(tokens[i], env))

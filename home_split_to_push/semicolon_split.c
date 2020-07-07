@@ -6,7 +6,7 @@
 /*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/30 15:23:58 by jkang             #+#    #+#             */
-/*   Updated: 2020/07/07 11:30:08 by jkang            ###   ########.fr       */
+/*   Updated: 2020/07/07 19:34:23 by jkang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,27 @@ static int	ft_cmd_len(char *line)
 	return (cmd_len);
 }
 
+static int	only_semicolon_body(char *line, int semicolon_count,\
+													int other_count)
+{
+	if (*line != '\0' && *(line + 1) == ';')
+		semicolon_count = 2;
+	if (other_count == 0)
+	{
+		if (semicolon_count == 0 || semicolon_count == 1)
+		{
+			ft_putendl_fd("bash: syntax error near unexpected token ';'", 2);
+			return (0);
+		}
+		else if (semicolon_count > 1)
+		{
+			ft_putendl_fd("bash: syntax error near unexpected token ';;'", 2);
+			return (0);
+		}
+	}
+	return (1);
+}
+
 int			only_semicolon(char *line)
 {
 	int		semicolon_count;
@@ -67,21 +88,8 @@ int			only_semicolon(char *line)
 				++other_count;
 			++line;
 		}
-		if (*line != '\0' && *(line + 1) == ';')
-			semicolon_count = 2;
-		if (other_count == 0)
-		{
-			if (semicolon_count == 0 || semicolon_count == 1)
-			{
-				ft_putendl_fd("bash: syntax error near unexpected token ';'", 2);
-				return (1);
-			}
-			else if (semicolon_count > 1)
-			{	
-				ft_putendl_fd("bash: syntax error near unexpected token ';;'", 2);
-				return (1);
-			}
-		}
+		if (!only_semicolon_body(line, semicolon_count, other_count))
+			return (1);
 		if (*line == '\0')
 			break ;
 		++line;
