@@ -106,6 +106,7 @@ cf ) 전처리는 아니지만 sh_export 강화
 
 1. semicolon error 
 
-2.  echo "\$hi" ⇒ echo $hi로 출력된다. (escape letter 때문) 이런 예외 경우를 더 잡아내야 한다.
+2.  echo "\$hi" ⇒ echo $hi로 출력된다. (escape letter 때문)
+    이런 예외 경우가 더 있다면 잡아내야 한다.
 
 3. 추후 기타 개선사항
