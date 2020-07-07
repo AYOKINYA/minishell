@@ -50,21 +50,20 @@ static int	ft_cmd_len(char *line)
 int			only_semicolon(char *line)
 {
 	int		semicolon_count;
-	int		space_count;
 	int		other_count;
 
 	while (*line != '\0')
 	{
 		semicolon_count = 0;
-		space_count = 0;
 		other_count = 0;
-		while (*line++ == ';')
+		while (*line == ';')
+		{
 			++semicolon_count;
+			++line;
+		}
 		while (*line != ';' && *line != '\0')
 		{
-			if (*line == ' ')
-				++space_count;
-			else
+			if (*line != ' ')
 				++other_count;
 			++line;
 		}
