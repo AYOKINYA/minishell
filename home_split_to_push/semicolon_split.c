@@ -6,7 +6,7 @@
 /*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/30 15:23:58 by jkang             #+#    #+#             */
-/*   Updated: 2020/07/07 10:28:27 by jkang            ###   ########.fr       */
+/*   Updated: 2020/07/07 11:30:08 by jkang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,26 +50,42 @@ static int	ft_cmd_len(char *line)
 int			only_semicolon(char *line)
 {
 	int		semicolon_count;
-	int		i;
-	char	*start;
+	int		space_count;
+	int		other_count;
 
-	semicolon_count = 0;
-	i = 0;
-	start = line;
 	while (*line != '\0')
 	{
-		if (*line == ' ' || *line == ';')
-			++i;
-		if (*line == ';')
+		semicolon_count = 0;
+		space_count = 0;
+		other_count = 0;
+		while (*line++ == ';')
 			++semicolon_count;
+		while (*line != ';' && *line != '\0')
+		{
+			if (*line == ' ')
+				++space_count;
+			else
+				++other_count;
+			++line;
+		}
+		if (*line != '\0' && *(line + 1) == ';')
+			semicolon_count = 2;
+		if (other_count == 0)
+		{
+			if (semicolon_count == 0 || semicolon_count == 1)
+			{
+				ft_putendl_fd("bash: syntax error near unexpected token ';'", 2);
+				return (1);
+			}
+			else if (semicolon_count > 1)
+			{	
+				ft_putendl_fd("bash: syntax error near unexpected token ';;'", 2);
+				return (1);
+			}
+		}
+		if (*line == '\0')
+			break ;
 		++line;
-	}
-	if (semicolon_count == 1 && start[i] == '\0')
-		return (1);
-	else if (semicolon_count > 1 && start[i] == '\0')
-	{
-		ft_putendl_fd("zsh: parse error near ';;'", 1);
-		return (1);
 	}
 	return (0);
 }
