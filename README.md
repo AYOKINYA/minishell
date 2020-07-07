@@ -100,13 +100,13 @@ escape_excetion이 2일 때는 큰 따옴표고 그 다음에 바로 $나 "가 �
 
 3. echo '\\\' 시리즈 수정
 
+4. semicolon error 처리
+
 cf ) 전처리는 아니지만 sh_export 강화
 
-전처리에서 아직 해야 할 것
+전처리에서 해야 할 것
 
-1. semicolon error 
-
-2.  echo "\$hi" ⇒ echo $hi로 출력된다. (escape letter 때문)
+1.  echo "\$hi" ⇒ echo $hi로 출력된다. (escape letter 때문)
     이런 예외 경우가 더 있다면 잡아내야 한다.
 
-3. 추후 기타 개선사항
+2. 추후 기타 개선사항
