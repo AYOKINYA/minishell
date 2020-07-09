@@ -6,7 +6,7 @@
 /*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/30 15:13:13 by jkang             #+#    #+#             */
-/*   Updated: 2020/07/09 21:19:43 by jkang            ###   ########.fr       */
+/*   Updated: 2020/07/09 22:06:30 by jkang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,8 +61,9 @@ int	cmd_not_builtins(char **tokens, char **envp)
 			return (0);
 		else if (ret == 1)
 		{
+			ft_putstr_fd("bash: ", 2);
 			ft_putstr_fd(tokens[0], 2);
-			ft_putendl_fd("bash: command not found", 2);
+			ft_putendl_fd(": command not found", 2);
 			exit(127);
 		}
 	}

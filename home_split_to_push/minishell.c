@@ -6,7 +6,7 @@
 /*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/30 15:16:41 by jkang             #+#    #+#             */
-/*   Updated: 2020/07/09 20:49:46 by jkang            ###   ########.fr       */
+/*   Updated: 2020/07/09 22:08:45 by jkang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,9 +43,10 @@ static void		sig_handler(int signo)
 {
 	if (signo == SIGINT)
 	{
-		ft_putendl_fd(" SIGINT!", 2);
 		g_sig_status = 1;
-		ft_putstr_fd("> ", 2);
+		ft_putendl_fd(" SIGINT!", 2);
+		printf("g_sig_status %d\n", g_sig_status);
+		ft_putstr_fd("sig> ", 2);
 	}
 	if (signo == SIGQUIT)
 	{
@@ -78,7 +79,7 @@ static int		go_minishell_go(t_list *env, char **envp)
 			p_status = 1;
 			return (0);
 		}
-		if (read_status > 0 && g_sig_status != 1)
+		if (read_status > 0)
 			ft_putstr_fd("> ", 1);
 		else if (read_status == -1)
 			return (0);
