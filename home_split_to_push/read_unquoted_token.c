@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   read_unquoted_token.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jkang <jkang@student.42seoul.kr>           +#+  +:+       +#+        */
+/*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/30 15:18:53 by jkang             #+#    #+#             */
-/*   Updated: 2020/07/06 15:57:33 by jkang            ###   ########.fr       */
+/*   Updated: 2020/07/09 21:35:44 by jkang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,9 @@ static int	unquoted_token_len(int *quote, char **line, int *escape_exception)
 		if (**line == '\\')
 		{
 			++(*line);
-			if (is_special(**line))
-				*escape_exception = 1;
+			// if (is_special(**line))
+			// 	*escape_exception = 1;
+			*escape_exception = 1;
 		}
 		if (**line != '\0')
 			++(*line);
