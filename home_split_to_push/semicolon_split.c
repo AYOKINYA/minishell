@@ -6,7 +6,7 @@
 /*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/30 15:23:58 by jkang             #+#    #+#             */
-/*   Updated: 2020/07/09 20:48:44 by jkang            ###   ########.fr       */
+/*   Updated: 2020/07/09 20:51:28 by jkang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,13 +47,19 @@ static int	ft_cmd_len(char *line)
 	return (cmd_len);
 }
 
-static int	only_semicolon_body(char *line, int semicolon_count,\
+static int	only_semicolon_body(char **line, int semicolon_count,\
 													int other_count)
 {
-	while (*line == ';')
+	while (**line != ';' && **line != '\0')
+		{
+			if (**line != ' ')
+				++other_count;
+			++(*line);
+		}
+	while (**line == ';')
 	{
 		++semicolon_count;
-		++line;
+		++(*line);
 	}
 	if (other_count == 0 || semicolon_count >= 2)
 	{
@@ -90,13 +96,7 @@ int			only_semicolon(char *line)
 			ft_putendl_fd("bash: syntax error near unexpected token ';'", 2);
 			return (1);
 		}
-		while (*line != ';' && *line != '\0')
-		{
-			if (*line != ' ')
-				++other_count;
-			++line;
-		}
-		if (!only_semicolon_body(line, semicolon_count, other_count))
+		if (!only_semicolon_body(&line, semicolon_count, other_count))
 			return (1);
 		if (*line == '\0')
 			break ;
