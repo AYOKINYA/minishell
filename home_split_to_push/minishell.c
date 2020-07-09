@@ -6,7 +6,7 @@
 /*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/30 15:16:41 by jkang             #+#    #+#             */
-/*   Updated: 2020/06/30 16:43:01 by jkang            ###   ########.fr       */
+/*   Updated: 2020/07/09 11:35:55 by jkang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,7 +100,7 @@ int				main(int argc, char **argv, char **envp)
 	signal(SIGINT, sig_handler);
 	signal(SIGQUIT, sig_handler);
 	welcome();
-	if (go_minishell_go(env, envp) < 0)
+	if (!go_minishell_go(env, envp))
 		return (-1);
 	ft_lstclear(&env, free);
 	return (0);
