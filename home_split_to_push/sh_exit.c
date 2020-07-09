@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   sh_exit.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jkang <jkang@student.42seoul.kr>           +#+  +:+       +#+        */
+/*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/30 15:24:38 by jkang             #+#    #+#             */
-/*   Updated: 2020/07/05 13:17:43 by jkang            ###   ########.fr       */
+/*   Updated: 2020/07/09 19:56:00 by jkang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,9 +37,6 @@ int			sh_exit(char **tokens, int *p_status)
 		*p_status = 1;
 	}
 	else
-	{
-		ft_putstr_fd("bash: exit: numeric argument required\n", 2);
 		exit(2);
-	}
 	return (1);
 }
