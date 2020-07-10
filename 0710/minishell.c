@@ -6,7 +6,7 @@
 /*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/30 15:16:41 by jkang             #+#    #+#             */
-/*   Updated: 2020/07/09 22:08:45 by jkang            ###   ########.fr       */
+/*   Updated: 2020/07/10 21:24:08 by jkang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,8 +45,11 @@ static void		sig_handler(int signo)
 	{
 		g_sig_status = 1;
 		ft_putendl_fd(" SIGINT!", 2);
-		printf("g_sig_status %d\n", g_sig_status);
-		ft_putstr_fd("sig> ", 2);
+		if (g_pid == 0)
+			ft_putstr_fd("> ", 2);
+		else
+			g_pid = 0;
+		
 	}
 	if (signo == SIGQUIT)
 	{

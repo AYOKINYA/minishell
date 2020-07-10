@@ -6,7 +6,7 @@
 /*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/30 16:45:08 by jkang             #+#    #+#             */
-/*   Updated: 2020/07/10 11:05:59 by jkang            ###   ########.fr       */
+/*   Updated: 2020/07/10 21:11:13 by jkang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,4 +89,5 @@ char		**make_env_to_envp(t_list *env);
 int			path_is_in_envp(char **envp);
 
 int			g_sig_status;
+pid_t		g_pid;
 #endif

@@ -6,13 +6,13 @@
 /*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/30 15:21:30 by jkang             #+#    #+#             */
-/*   Updated: 2020/06/30 16:38:39 by jkang            ###   ########.fr       */
+/*   Updated: 2020/07/10 21:21:44 by jkang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-static int	parent_process(pid_t pid, int *pipe_fd, int *p_status)
+static int	parent_process(int *pipe_fd, int *p_status)
 {
 	int		status;
 	pid_t	wait_pid;
@@ -20,9 +20,10 @@ static int	parent_process(pid_t pid, int *pipe_fd, int *p_status)
 	close(pipe_fd[1]);
 	dup2(pipe_fd[0], 0);
 	close(pipe_fd[0]);
-	wait_pid = waitpid(pid, &status, 0);
+	wait_pid = waitpid(g_pid, &status, 0);
 	if (wait_pid == -1)
 		ft_putstr_fd("wait_pid returns error. no child process", 2);
+	g_pid = 0;
 	*p_status = status / 256;
 	return (1);
 }
@@ -52,18 +53,17 @@ static int	main_cmd_with_fork(char **cmd, t_list *env,\
 int			process_cmds_with_fork(char ***cmds, t_list *env,\
 													int *p_status)
 {
-	pid_t	pid;
 	int		pipe_fd[2];
 	char	**cmd;
 
 	if (pipe(pipe_fd) == 1)
 		return (0);
-	if ((pid = fork()) == -1)
+	if ((g_pid = fork()) == -1)
 	{
 		ft_putstr_fd("Fork is failed.", 2);
 		return (0);
 	}
-	else if (pid == 0)
+	else if (g_pid == 0)
 	{
 		if (!(cmd = refine_cmd(cmds, pipe_fd)))
 			exit(1);
@@ -73,7 +73,7 @@ int			process_cmds_with_fork(char ***cmds, t_list *env,\
 	}
 	else
 	{
-		if (!parent_process(pid, pipe_fd, p_status))
+		if (!parent_process(pipe_fd, p_status))
 			return (0);
 	}
 	return (1);
