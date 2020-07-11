@@ -6,7 +6,7 @@
 /*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/30 15:18:53 by jkang             #+#    #+#             */
-/*   Updated: 2020/07/09 21:35:44 by jkang            ###   ########.fr       */
+/*   Updated: 2020/07/11 15:13:31 by jkang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,14 @@ static int	unquoted_token_len(int *quote, char **line, int *escape_exception)
 			*escape_exception = 1;
 		}
 		if (**line != '\0')
+		{
+			if (*(*line + 1) == '\'' || *(*line + 1)  == '\"')
+			{
+				++len;
+				break ;
+			}
 			++(*line);
+		}
 		++len;
 	}
 	return (len);

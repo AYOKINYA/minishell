@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   read_quoted_token.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jkang <jkang@student.42seoul.kr>           +#+  +:+       +#+        */
+/*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/30 15:22:10 by jkang             #+#    #+#             */
-/*   Updated: 2020/07/06 16:53:44 by jkang            ###   ########.fr       */
+/*   Updated: 2020/07/11 14:49:32 by jkang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,11 +76,20 @@ char		*read_quoted_token(int *quote, char **line)
 	char	*res;
 	int		len;
 	int		escape_exception;
+	int		count = 0;
 
 	if (*quote != 0)
 	{
 		while (**line == *quote)
-			++(*line); 
+		{
+			++(*line);
+			++count;
+		}
+	}
+	if (count % 2 == 0)
+	{
+		*quote = 0;
+		return (ft_strdup(""));
 	}
 	from = *line;
 	escape_exception = 0;

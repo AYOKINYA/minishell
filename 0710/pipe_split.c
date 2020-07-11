@@ -6,7 +6,7 @@
 /*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/30 15:14:10 by jkang             #+#    #+#             */
-/*   Updated: 2020/06/30 16:34:14 by jkang            ###   ########.fr       */
+/*   Updated: 2020/07/11 14:49:41 by jkang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ static int	count_args(char **args)
 	count = 0;
 	while (*args != 0)
 	{
-		if (**args == '|' * -1 || **args == '\0')
+		if (**args == '|' * -1)
 			break ;
 		++count;
 		++args;
