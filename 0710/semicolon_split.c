@@ -6,7 +6,7 @@
 /*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/30 15:23:58 by jkang             #+#    #+#             */
-/*   Updated: 2020/07/09 20:51:28 by jkang            ###   ########.fr       */
+/*   Updated: 2020/07/11 17:14:57 by jkang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,11 +51,11 @@ static int	only_semicolon_body(char **line, int semicolon_count,\
 													int other_count)
 {
 	while (**line != ';' && **line != '\0')
-		{
-			if (**line != ' ')
-				++other_count;
-			++(*line);
-		}
+	{
+		if (**line != ' ')
+			++other_count;
+		++(*line);
+	}
 	while (**line == ';')
 	{
 		++semicolon_count;

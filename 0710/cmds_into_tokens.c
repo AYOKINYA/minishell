@@ -6,7 +6,7 @@
 /*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/07/06 17:43:27 by jkang             #+#    #+#             */
-/*   Updated: 2020/07/11 15:15:31 by jkang            ###   ########.fr       */
+/*   Updated: 2020/07/11 17:09:22 by jkang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ static char	*join_and_patch(char *res, char *tmp, char *line, t_list *tokens)
 	return (res);
 }
 
-int	cmds_into_tokens(char *line, t_list *tokens)
+int			cmds_into_tokens(char *line, t_list *tokens)
 {
 	int		quote;
 	char	*res;

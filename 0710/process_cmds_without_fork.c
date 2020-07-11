@@ -6,7 +6,7 @@
 /*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/30 15:09:23 by jkang             #+#    #+#             */
-/*   Updated: 2020/07/10 21:25:46 by jkang            ###   ########.fr       */
+/*   Updated: 2020/07/11 17:13:19 by jkang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ static int	exec_not_builtin_cmds(char **cmd, int *p_status, t_list *env)
 }
 
 int			process_cmd_without_fork(char ***cmds, t_list *env,\
-										 int *p_status)
+										int *p_status)
 {
 	int ret;
 

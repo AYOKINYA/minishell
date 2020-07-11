@@ -6,7 +6,7 @@
 /*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/30 15:22:10 by jkang             #+#    #+#             */
-/*   Updated: 2020/07/11 14:49:32 by jkang            ###   ########.fr       */
+/*   Updated: 2020/07/11 17:08:57 by jkang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,10 +15,7 @@
 static void	escape_letter(int *quote, char **line, int *escape_exception)
 {
 	if (*quote == '\'' && (*line)[1] == '\\')
-	{
-		//++(*line);
 		*escape_exception = 1;
-	}
 	else if (*quote == '\"' && ((*line)[1] == '$' ||\
 							(*line)[1] == '\\' || (*line)[1] == '\"'))
 	{
@@ -76,21 +73,15 @@ char		*read_quoted_token(int *quote, char **line)
 	char	*res;
 	int		len;
 	int		escape_exception;
-	int		count = 0;
 
-	if (*quote != 0)
-	{
-		while (**line == *quote)
-		{
-			++(*line);
-			++count;
-		}
-	}
-	if (count % 2 == 0)
+	if (*(*line + 1) == *quote)
 	{
 		*quote = 0;
+		++(*line);
 		return (ft_strdup(""));
 	}
+	else
+		++(*line);
 	from = *line;
 	escape_exception = 0;
 	len = quoted_token_len(quote, line, &escape_exception);

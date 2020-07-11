@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec_input.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jkang <jkang@student.42seoul.kr>           +#+  +:+       +#+        */
+/*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/30 16:33:41 by jkang             #+#    #+#             */
-/*   Updated: 2020/07/05 16:21:18 by jkang            ###   ########.fr       */
+/*   Updated: 2020/07/11 17:10:01 by jkang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ static char	***get_cmds_with_pipe_split(char *line, t_list *env)
 }
 
 static int	split_pipe_and_process_cmd(char *input, t_list *env,\
-											 int *p_status)
+											int *p_status)
 {
 	int		save[2];
 	char	***cmds;

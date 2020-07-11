@@ -6,7 +6,7 @@
 /*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/30 15:16:41 by jkang             #+#    #+#             */
-/*   Updated: 2020/07/10 21:24:08 by jkang            ###   ########.fr       */
+/*   Updated: 2020/07/11 17:10:29 by jkang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,6 @@ static void		sig_handler(int signo)
 			ft_putstr_fd("> ", 2);
 		else
 			g_pid = 0;
-		
 	}
 	if (signo == SIGQUIT)
 	{
@@ -92,6 +91,7 @@ static int		go_minishell_go(t_list *env)
 	}
 	return (1);
 }
+
 int				main(int argc, char **argv, char **envp)
 {
 	t_list	*env;
