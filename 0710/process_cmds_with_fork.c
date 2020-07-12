@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   process_cmds_with_fork.c                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
+/*   By: jkang <jkang@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/30 15:21:30 by jkang             #+#    #+#             */
-/*   Updated: 2020/07/10 21:21:44 by jkang            ###   ########.fr       */
+/*   Updated: 2020/07/12 19:05:52 by jkang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ int			process_cmds_with_fork(char ***cmds, t_list *env,\
 	int		pipe_fd[2];
 	char	**cmd;
 
-	if (pipe(pipe_fd) == 1)
+	if (pipe(pipe_fd) == -1)
 		return (0);
 	if ((g_pid = fork()) == -1)
 	{
