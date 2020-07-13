@@ -6,7 +6,7 @@
 /*   By: jkang <jkang@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/10 12:12:25 by jkang             #+#    #+#             */
-/*   Updated: 2020/05/29 22:53:06 by jkang            ###   ########.fr       */
+/*   Updated: 2020/06/22 16:11:40 by jkang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ void				ft_putstr_fd(char *s, int fd);
 void				ft_putendl_fd(char *s, int fd);
 void				ft_putnbr_fd(int n, int fd);
 int					ft_strcmp(const char *s1, const char *s2);
+char				*ft_strjoin_without_free(char *s1, char const *s2);
 
 typedef struct		s_list
 {

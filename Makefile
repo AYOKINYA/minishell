@@ -1,10 +1,38 @@
 NAME = minishell
-
 CC = gcc
 
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -g -Wall -Wextra -Werror
 
-SRCS =  tmp.c
+SRCS =  minishell.c \
+		get_next_line.c\
+		sh_echo.c\
+		sh_exit.c\
+		sh_env.c\
+		sh_pwd.c\
+		sh_cd.c\
+		sh_export.c\
+		sh_export_2.c\
+		sh_unset.c\
+		search_with_path.c\
+		free.c\
+		pipe_split.c\
+		semicolon_split.c\
+		redirection_split.c\
+		read_quoted_token.c\
+		read_unquoted_token.c\
+		patch_token.c\
+		validate_redirection.c\
+		tokenize.c\
+		get_value.c\
+		convert_to_env_var.c\
+		refine_cmd.c\
+		process_cmds_with_fork.c\
+		process_cmds_without_fork.c\
+		process_cmd.c\
+		exec_input.c\
+		exec_builtin_cmds.c\
+		cmds_into_tokens.c \
+		make_env_to_envp.c
 
 OBJS = $(SRCS:.c=.o)
 

@@ -6,7 +6,7 @@
 /*   By: jkang <jkang@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/26 20:12:47 by jkang             #+#    #+#             */
-/*   Updated: 2020/04/10 12:57:45 by jkang            ###   ########.fr       */
+/*   Updated: 2020/06/06 23:03:33 by jkang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,6 @@ char			*ft_substr(char const *s, unsigned int start, size_t len)
 	size_t			s_len;
 
 	s_len = ft_strlen(s);
-	if (s_len == 0)
-		return (0);
 	if (s_len < start)
 	{
 		temp = (char *)malloc(sizeof(char) * 2);

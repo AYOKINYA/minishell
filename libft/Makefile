@@ -47,7 +47,8 @@ SRCS =  ft_memset.c \
 		ft_lstdelone.c \
 		ft_lstclear.c \
 		ft_lstiter.c \
-		ft_lstmap.c
+		ft_lstmap.c \
+		ft_strjoin_without_free.c
 
 OBJS = $(SRCS:.c=.o)
 
