@@ -6,7 +6,7 @@
 /*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/30 15:16:41 by jkang             #+#    #+#             */
-/*   Updated: 2020/07/11 17:10:29 by jkang            ###   ########.fr       */
+/*   Updated: 2020/07/13 14:07:48 by jkang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ static void		sig_handler(int signo)
 
 static void		welcome(void)
 {
-	ft_putendl_fd("Hi, it's jkang's minishell.", 1);
+	ft_putendl_fd("Hi, it's 42st minishell.", 1);
 	ft_putstr_fd("> ", 1);
 }
 
