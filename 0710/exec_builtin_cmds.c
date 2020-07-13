@@ -6,7 +6,7 @@
 /*   By: jkang <jkang@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/30 15:13:13 by jkang             #+#    #+#             */
-/*   Updated: 2020/07/11 17:12:58 by jkang            ###   ########.fr       */
+/*   Updated: 2020/07/13 14:02:46 by jkang            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,8 @@ int			cmd_not_builtins(char **tokens, t_list *env)
 
 	if (!(envp = make_env_to_envp(env)))
 		exit(1);
+	if (ft_strcmp(tokens[0], "\0") == 0)
+		return (1);
 	if (ft_strncmp(tokens[0], "/", 1) == 0 || !path_is_in_envp(envp))
 	{
 		if ((ret = execve(tokens[0], tokens, envp)) == -1)
