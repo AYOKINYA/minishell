@@ -16,7 +16,7 @@ static int	is_alpha_num(char *s)
 {
 	while (*s != '\0')
 	{
-		if (!ft_isalnum(*s))
+		if (!ft_isalnum(*s) && *s != '_')
 			return (0);
 		++s;
 	}
