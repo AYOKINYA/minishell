@@ -23,7 +23,7 @@ int	sh_env(char **tokens, t_list *env, int *p_status)
 		ft_putstr_fd(tokens[1], 2);
 		ft_putstr_fd("'", 2);
 		ft_putendl_fd(": No such file or directory", 2);
-		*p_status = 1;
+		*p_status = 127;
 		return (0);
 	}
 	env = env->next;
