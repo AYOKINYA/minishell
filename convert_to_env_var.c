@@ -25,6 +25,8 @@ static int	add_var(char **s, t_list *env, char **res)
 	while (**s != '\0' && **s != '$' * -1 && **s != '\'' &&\
 							**s != ' ' && **s != '\"' && **s != ':')
 	{
+		if (i > 0 && **s == '?')
+			break ;
 		++i;
 		++(*s);
 	}
@@ -40,7 +42,6 @@ static int	add_var(char **s, t_list *env, char **res)
 
 static int	var_len(char **s, t_list *env)
 {
-	int		i;
 	int		value_len;
 	char	*copy;
 
@@ -48,18 +49,19 @@ static int	var_len(char **s, t_list *env)
 	if (**s == '\0')
 		return (0);
 	copy = *s;
-	i = 0;
 	value_len = 0;
 	while (**s != '\0' && **s != '$' * -1 && **s != '\'' &&\
 							**s != ' ' && **s != '\"' && **s != ':')
 	{
-		++i;
+		if (value_len > 0 && **s == '?')
+			break ;
+		++value_len;
 		++(*s);
 	}
 	while (env != 0)
 	{
-		if (ft_strncmp(env->content, copy, i) == 0 &&\
-											((char *)env->content)[i] == '=')
+		if (ft_strncmp(env->content, copy, value_len) == 0 &&\
+									((char *)env->content)[value_len] == '=')
 			value_len = get_value_len(env->content);
 		env = env->next;
 	}
