@@ -12,7 +12,7 @@
 
 #include "minishell.h"
 
-int			check_fd_aggregation(char **args, int *p_status)
+int			check_fd_aggregation(char **args)
 {
 	int count;
 	int i;
@@ -35,7 +35,7 @@ int			check_fd_aggregation(char **args, int *p_status)
 	if (count > 1)
 	{
 		ft_putendl_fd("fd aggregation is not supported.", 2);
-		*p_status = 1;
+		g_status = 1;
 		return (0);
 	}
 	return (1);
@@ -66,11 +66,11 @@ static int	if_no_need_pipe(char ***cmds)
 	return (0);
 }
 
-int			process_cmd(char ***cmds, t_list *env, int *p_status)
+int			process_cmd(char ***cmds, t_list *env)
 {
 	if (if_no_need_pipe(cmds))
 	{
-		if (!process_cmd_without_fork(cmds, env, p_status))
+		if (!process_cmd_without_fork(cmds, env))
 			return (0);
 		return (1);
 	}
@@ -82,9 +82,9 @@ int			process_cmd(char ***cmds, t_list *env, int *p_status)
 				return (1);
 			if (!validate_redirection(*cmds))
 				return (1);
-			if (!check_fd_aggregation(*cmds, p_status))
+			if (!check_fd_aggregation(*cmds))
 				return (1);
-			if (!process_cmds_with_fork(cmds, env, p_status))
+			if (!process_cmds_with_fork(cmds, env))
 				return (0);
 			++cmds;
 		}

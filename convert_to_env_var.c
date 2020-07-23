@@ -61,7 +61,7 @@ static int	var_len(char **s, t_list *env)
 	while (env != 0)
 	{
 		if (ft_strncmp(env->content, copy, value_len) == 0 &&\
-									((char *)env->content)[value_len] == '=')
+										((char *)env->content)[value_len] == '=')
 			value_len = get_value_len(env->content);
 		env = env->next;
 	}

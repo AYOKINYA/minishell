@@ -23,7 +23,7 @@ static int	is_numeric(char *s)
 	return (1);
 }
 
-int			sh_exit(char **tokens, int *p_status)
+int			sh_exit(char **tokens)
 {
 	int token_count;
 
@@ -34,7 +34,7 @@ int			sh_exit(char **tokens, int *p_status)
 	else if (token_count > 2 && is_numeric(tokens[1]))
 	{
 		ft_putendl_fd("bash: exit: too many arguments", 2);
-		*p_status = 1;
+		g_status = 1;
 	}
 	else
 		exit(2);

@@ -67,7 +67,7 @@ static void	print_env_w_declare(t_list *env)
 	}
 }
 
-int			sh_export(char **tokens, t_list *env, int *p_status)
+int			sh_export(char **tokens, t_list *env)
 {
 	int		i;
 	int		token_count;
@@ -83,13 +83,13 @@ int			sh_export(char **tokens, t_list *env, int *p_status)
 		{
 			if (!(ret = sh_export_body(tokens, env, i)))
 			{
-				*p_status = 1;
+				g_status = 1;
 				return (0);
 			}
 			else if (ret == -1)
-				*p_status = 1;
+				g_status = 1;
 		}
 	}
-	*p_status = 0;
+	g_status = 0;
 	return (1);
 }

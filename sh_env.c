@@ -12,7 +12,7 @@
 
 #include "minishell.h"
 
-int	sh_env(char **tokens, t_list *env, int *p_status)
+int	sh_env(char **tokens, t_list *env)
 {
 	int token_count;
 
@@ -23,7 +23,7 @@ int	sh_env(char **tokens, t_list *env, int *p_status)
 		ft_putstr_fd(tokens[1], 2);
 		ft_putstr_fd("'", 2);
 		ft_putendl_fd(": No such file or directory", 2);
-		*p_status = 127;
+		g_status = 127;
 		return (0);
 	}
 	env = env->next;
@@ -33,6 +33,6 @@ int	sh_env(char **tokens, t_list *env, int *p_status)
 		write(1, "\n", 1);
 		env = env->next;
 	}
-	*p_status = 0;
+	g_status = 0;
 	return (1);
 }

@@ -80,28 +80,28 @@ int			cmd_not_builtins(char **tokens, t_list *env)
 	return (1);
 }
 
-int			exec_builtin_cmds(char **tokens, t_list *env, int *p_status)
+int			exec_builtin_cmds(char **tokens, t_list *env)
 {
 	if (ft_strcmp(tokens[0], "exit") == 0)
-		sh_exit(tokens, p_status);
+		sh_exit(tokens);
 	else if (ft_strcmp(tokens[0], "cd") == 0)
-		sh_cd(tokens, env, p_status);
+		sh_cd(tokens, env);
 	else if (ft_strcmp(tokens[0], "export") == 0)
 	{
-		if (!sh_export(tokens, env, p_status))
+		if (!sh_export(tokens, env))
 			return (-1);
 	}
 	else if (ft_strcmp(tokens[0], "unset") == 0)
-		sh_unset(tokens, env, p_status);
+		sh_unset(tokens, env);
 	else if (ft_strcmp(tokens[0], "echo") == 0)
-		sh_echo(tokens, p_status);
+		sh_echo(tokens);
 	else if (ft_strcmp(tokens[0], "pwd") == 0)
 	{
-		if (!sh_pwd(p_status))
+		if (!sh_pwd())
 			return (-1);
 	}
 	else if (ft_strcmp(tokens[0], "env") == 0)
-		sh_env(tokens, env, p_status);
+		sh_env(tokens, env);
 	else
 		return (0);
 	return (1);

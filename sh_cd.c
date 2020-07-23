@@ -12,7 +12,7 @@
 
 #include "minishell.h"
 
-static int	sh_ch_homedir(t_list *env, int *p_status)
+static int	sh_ch_homedir(t_list *env)
 {
 	while (env != 0)
 	{
@@ -23,7 +23,7 @@ static int	sh_ch_homedir(t_list *env, int *p_status)
 				ft_putstr_fd("bash: cd: ", 2);
 				ft_putstr_fd(env->content + 5, 2);
 				ft_putendl_fd(": no such file or directory", 2);
-				*p_status = 1;
+				g_status = 1;
 				return (0);
 			}
 		}
@@ -32,20 +32,20 @@ static int	sh_ch_homedir(t_list *env, int *p_status)
 	return (1);
 }
 
-static int	sh_chdir(char **tokens, int *p_status)
+static int	sh_chdir(char **tokens)
 {
 	if (chdir(tokens[1]) == -1)
 	{
 		ft_putstr_fd("bash: cd: ", 2);
 		ft_putstr_fd(tokens[1], 2);
 		ft_putendl_fd(": no such file or directory", 2);
-		*p_status = 1;
+		g_status = 1;
 		return (0);
 	}
 	return (1);
 }
 
-int			sh_cd(char **tokens, t_list *env, int *p_status)
+int			sh_cd(char **tokens, t_list *env)
 {
 	int token_count;
 
@@ -53,19 +53,19 @@ int			sh_cd(char **tokens, t_list *env, int *p_status)
 	if (token_count == 1 || (token_count == 2 &&\
 		ft_strlen(tokens[1]) == 1 && tokens[1][0] == '~'))
 	{
-		if (!sh_ch_homedir(env, p_status))
+		if (!sh_ch_homedir(env))
 			return (0);
 	}
 	else if (token_count > 2)
 	{
 		ft_putendl_fd("bash: cd: too many arguments", 2);
-		*p_status = 1;
+		g_status = 1;
 	}
 	else
 	{
-		if (!(sh_chdir(tokens, p_status)))
+		if (!(sh_chdir(tokens)))
 			return (0);
 	}
-	*p_status = 0;
+	g_status = 0;
 	return (1);
 }

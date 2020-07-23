@@ -12,7 +12,7 @@
 
 #include "minishell.h"
 
-static int	parent_process(int *pipe_fd, int *p_status)
+static int	parent_process(int *pipe_fd)
 {
 	int		status;
 	pid_t	wait_pid;
@@ -22,18 +22,22 @@ static int	parent_process(int *pipe_fd, int *p_status)
 	close(pipe_fd[0]);
 	wait_pid = waitpid(g_pid, &status, 0);
 	if (wait_pid == -1)
+	{
 		ft_putstr_fd("wait_pid returns error. no child process", 2);
+		return (0);
+	}
 	g_pid = 0;
-	*p_status = status / 256;
+	g_status = status / 256;
+	if (status == 2)
+		g_status = 130;
 	return (1);
 }
 
-static int	main_cmd_with_fork(char **cmd, t_list *env,\
-												int *p_status)
+static int	main_cmd_with_fork(char **cmd, t_list *env)
 {
 	int ret;
 
-	if ((ret = exec_builtin_cmds(cmd, env, p_status)) == -1)
+	if ((ret = exec_builtin_cmds(cmd, env)) == -1)
 	{
 		free_2d_array(cmd);
 		return (0);
@@ -50,8 +54,7 @@ static int	main_cmd_with_fork(char **cmd, t_list *env,\
 	return (1);
 }
 
-int			process_cmds_with_fork(char ***cmds, t_list *env,\
-													int *p_status)
+int			process_cmds_with_fork(char ***cmds, t_list *env)
 {
 	int		pipe_fd[2];
 	char	**cmd;
@@ -67,13 +70,13 @@ int			process_cmds_with_fork(char ***cmds, t_list *env,\
 	{
 		if (!(cmd = refine_cmd(cmds, pipe_fd)))
 			exit(1);
-		if (!main_cmd_with_fork(cmd, env, p_status))
+		if (!main_cmd_with_fork(cmd, env))
 			exit(1);
 		exit(0);
 	}
 	else
 	{
-		if (!parent_process(pipe_fd, p_status))
+		if (!parent_process(pipe_fd))
 			return (0);
 	}
 	return (1);

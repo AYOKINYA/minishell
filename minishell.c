@@ -66,26 +66,25 @@ static void		welcome(void)
 static int		go_minishell_go(t_list *env)
 {
 	char	*line;
-	int		p_status;
 	int		read_status;
 
 	line = 0;
 	read_status = 1;
-	p_status = 0;
+	g_status = 0;
 	while (read_status > 0)
 	{
 		read_status = get_next_line(0, &line);
-		if (!exec_input(line, env, &p_status))
+		if (!exec_input(line, env))
 		{
 			free(line);
-			p_status = 1;
+			g_status = 1;
 			return (0);
 		}
 		if (read_status > 0)
 			ft_putstr_fd("> ", 1);
 		else if (read_status == -1)
 			return (0);
-		if (p_status == 130)
+		if (g_status == 130)
 			g_sig_status = 0;
 		free(line);
 	}

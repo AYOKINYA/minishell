@@ -28,8 +28,7 @@ static char	***get_cmds_with_pipe_split(char *line, t_list *env)
 	return (cmds);
 }
 
-static int	split_pipe_and_process_cmd(char *input, t_list *env,\
-											int *p_status)
+static int	split_pipe_and_process_cmd(char *input, t_list *env)
 {
 	int		save[2];
 	char	***cmds;
@@ -38,7 +37,7 @@ static int	split_pipe_and_process_cmd(char *input, t_list *env,\
 		return (0);
 	save[0] = dup(0);
 	save[1] = dup(1);
-	if (!process_cmd(cmds, env, p_status))
+	if (!process_cmd(cmds, env))
 	{
 		free_3d_array(cmds);
 		return (0);
@@ -49,13 +48,13 @@ static int	split_pipe_and_process_cmd(char *input, t_list *env,\
 	return (1);
 }
 
-static int	dollar_question(t_list *env, int *p_status)
+static int	dollar_question(t_list *env)
 {
 	char *new;
 	char *var;
 	char *status;
 
-	if (!(status = ft_itoa(*p_status)))
+	if (!(status = ft_itoa(g_status)))
 		return (0);
 	if (!(var = ft_strdup("?=")))
 	{
@@ -78,7 +77,7 @@ static int	dollar_question(t_list *env, int *p_status)
 	return (1);
 }
 
-int			exec_input(char *line, t_list *env, int *p_status)
+int			exec_input(char *line, t_list *env)
 {
 	int		i;
 	char	**inputs;
@@ -91,10 +90,10 @@ int			exec_input(char *line, t_list *env, int *p_status)
 	while (inputs[++i] != 0)
 	{
 		if (g_sig_status == 1)
-			*p_status = 130;
-		if (!dollar_question(env, p_status))
+			g_status = 130;
+		if (!dollar_question(env))
 			return (0);
-		if (!split_pipe_and_process_cmd(inputs[i], env, p_status))
+		if (!split_pipe_and_process_cmd(inputs[i], env))
 		{
 			free_2d_array(inputs);
 			return (0);

@@ -12,7 +12,7 @@
 
 #include "minishell.h"
 
-int	sh_echo(char **tokens, int *p_status)
+int	sh_echo(char **tokens)
 {
 	int		token_count;
 	int		i;
@@ -22,7 +22,7 @@ int	sh_echo(char **tokens, int *p_status)
 	if (token_count == 1)
 	{
 		write(1, "\n", 1);
-		*p_status = 0;
+		g_status = 0;
 		return (1);
 	}
 	if (ft_strcmp(tokens[1], "-n") == 0)
@@ -36,6 +36,6 @@ int	sh_echo(char **tokens, int *p_status)
 	}
 	if (ft_strcmp(tokens[1], "-n") != 0)
 		write(1, "\n", 1);
-	*p_status = 0;
+	g_status = 0;
 	return (1);
 }

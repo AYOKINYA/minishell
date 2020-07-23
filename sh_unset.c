@@ -87,7 +87,7 @@ static int	sh_unset_body(char **tokens, int token_count, t_list *env)
 	return (1);
 }
 
-int			sh_unset(char **tokens, t_list *env, int *p_status)
+int			sh_unset(char **tokens, t_list *env)
 {
 	int token_count;
 
@@ -97,17 +97,17 @@ int			sh_unset(char **tokens, t_list *env, int *p_status)
 	if (token_count == 1)
 	{
 		ft_putendl_fd("unset: not enough arguments", 2);
-		*p_status = 1;
+		g_status = 1;
 		return (0);
 	}
 	else
 	{
 		if (!(sh_unset_body(tokens, token_count, env)))
 		{
-			*p_status = 1;
+			g_status = 1;
 			return (0);
 		}
 	}
-	*p_status = 0;
+	g_status = 0;
 	return (1);
 }

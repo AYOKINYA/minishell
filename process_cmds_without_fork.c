@@ -12,10 +12,24 @@
 
 #include "minishell.h"
 
-static int	exec_not_builtin_cmds(char **cmd, int *p_status, t_list *env)
+static int	parent_process(void)
 {
 	int		status;
 
+	if (waitpid(g_pid, &status, 0) == -1)
+	{
+		ft_putendl_fd("waitpid returns error. no child process", 2);
+		return (0);
+	}
+	g_pid = 0;
+	g_status = status / 256;
+	if (status == 2)
+		g_status = 130;
+	return (1);
+}
+
+static int	exec_not_builtin_cmds(char **cmd, t_list *env)
+{
 	if ((g_pid = fork()) == -1)
 	{
 		ft_putendl_fd("FORK FAILED", 2);
@@ -29,29 +43,23 @@ static int	exec_not_builtin_cmds(char **cmd, int *p_status, t_list *env)
 	}
 	else
 	{
-		if (waitpid(g_pid, &status, 0) == -1)
-		{
-			ft_putendl_fd("waitpid returns error. no child process", 2);
+		if (!parent_process())
 			return (0);
-		}
-		g_pid = 0;
-		*p_status = status / 256;
 	}
 	return (1);
 }
 
-int			process_cmd_without_fork(char ***cmds, t_list *env,\
-										int *p_status)
+int			process_cmd_without_fork(char ***cmds, t_list *env)
 {
 	int ret;
 
 	if ((*cmds)[0] == 0)
 		return (1);
-	if (!check_fd_aggregation(*cmds, p_status))
+	if (!check_fd_aggregation(*cmds))
 		return (1);
-	if (!(ret = exec_builtin_cmds(*cmds, env, p_status)))
+	if (!(ret = exec_builtin_cmds(*cmds, env)))
 	{
-		if (!exec_not_builtin_cmds(*cmds, p_status, env))
+		if (!exec_not_builtin_cmds(*cmds, env))
 			return (0);
 	}
 	else if (ret == -1)
